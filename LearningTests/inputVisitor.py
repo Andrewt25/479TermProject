@@ -1,58 +1,69 @@
 import ast
-import sys
-
-# returns value for constants
-def getConstantInput(nodeType, flag):
-    if flag == 'max':
-        if nodeType == str:
-            return "andy"
-        elif nodeType == int:
-            return sys.maxsize
-    elif flag == 'min':
-        if nodeType == str:
-            return ""
-        elif nodeType == int:
-            return ~sys.maxsize      
-    return '4'
-
-
-# add items equal to size to ast list using first item as type to generate input
-# if list is empty uses default constant input
-def getListInput(nodeList, flag):
-    size=2
-    length = len(nodeList)
-    nodeType = type(nodeList[0]) if length > 0 else None
-    for i in range(length, length+size):
-       node = ast.Constant(getConstantInput(nodeType, flag))
-       nodeList.insert(i,node)
-
-    return nodeList
-
-# Defines behaviour to modify/mock inputs for unit test
-def getInput(node, flag):
-    nodeType = type(node)
-    if nodeType == ast.Constant:
-        node.value = getConstantInput(type(node.value), flag)
-    elif nodeType == ast.List:
-        node.elts = getListInput(node.elts, flag)
-    return node
    
 class inputVisitor(ast.NodeTransformer):
-    def __init__(self, flag:str='min'):
+    def __init__(self, fileName:str, flag:str='min'):
       self.flag=flag
+      self.fileName = 'someFunction'
     # visiter for functions looks for specific test to mutate
     
     def visit_FunctionDef(self, node: ast.FunctionDef):
         if(node.name == 'perf_test'):
             for n in node.body:
                 if(n.__class__ == ast.Assign):
-
-                        n.value = getInput(n.value, self.flag) 
-        self.defNode = node
+                        n.value = self.__getInput(n.value) 
         self.generic_visit(node)
+        return node
+
+    def visit_Attribute(self, node: ast.Attribute) :
+        if(node.value.id == self.fileName):
+            node.value.id = self.fileName + '2'
         return node
     
     def visit_ClassDef(self, node: ast.ClassDef):
         self.testClassName = node.name
         self.generic_visit(node)
+        return node
+    
+    def visit_Import(self, node: ast.Import):
+        for alias in node.names:
+            if alias.name == self.fileName:
+                alias.name = self.fileName + '2'
+        self.generic_visit(node)
+        return node
+
+    # returns value for constants
+    def __getConstantInput(self, nodeType):
+        if self.flag == 'max':
+            if nodeType == str:
+                return "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            elif nodeType == int:
+                return 1
+        elif self.flag == 'min':
+            if nodeType == str:
+                return ""
+            elif nodeType == int:
+                return 0     
+        return '4'
+
+    # UTILITY FUNCTIONS
+
+    # add items equal to size to ast list using first item as type to generate input
+    # if list is empty uses default constant input
+    def __getListInput(self,nodeList):
+        size=self.__getConstantInput(int)
+        length = len(nodeList)
+        nodeType = type(nodeList[0].value) if length > 0 else None
+        for i in range(length, length+size):
+            node = ast.Constant(self.__getConstantInput(nodeType))
+            nodeList.insert(i,node)
+
+        return nodeList
+
+    # Defines behaviour to modify/mock inputs for unit test
+    def __getInput(self, node):
+        nodeType = type(node)
+        if nodeType == ast.Constant:
+            node.value = self.__getConstantInput(type(node.value))
+        elif hasattr(node, 'elts'):
+            node.elts = self.__getListInput(node.elts)
         return node

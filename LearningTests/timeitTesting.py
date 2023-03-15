@@ -16,16 +16,20 @@ def getTests(path:str) -> ast.Module:
 def timeFunction(path: str):
     tree = getTests(path)
     treeTwo = getTests(path)
+    fileName = path.split('\\').pop().rstrip('.py')
 
-    maxVisitor = inputVisitor(flag='max')
-    minVisitor = inputVisitor()
+    maxVisitor = inputVisitor(fileName,flag='max')
+    minVisitor = inputVisitor(fileName)
     newTree = ast.fix_missing_locations(maxVisitor.visit(tree))
-    minTree = ast.fix_missing_locations(minVisitor.visit(tree))
-    #print(ast.dump(tree, indent=2))
-    #print(visitor.defNode)
+    minTree = ast.fix_missing_locations(minVisitor.visit(treeTwo))
     p = ".\someFunctionTests2.py"
     with open(p, "w") as f:
         f.write(ast.unparse(newTree))
+        f.close()
+
+    p = ".\AST_Tree.txt"
+    with open(p, "w") as f:
+        f.write(ast.dump(tree, indent=2))
         f.close()
 
     p = ".\someFunctionTests3.py"
