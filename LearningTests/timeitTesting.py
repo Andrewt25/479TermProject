@@ -1,48 +1,64 @@
 import timeit
 import ast
+import subprocess
 import os
 
 from inputVisitor import inputVisitor
 
-
-def getTests(path:str) -> ast.Module:
+def getAST(path:str) -> ast.Module:
     with open(path) as f:
         tree = ast.parse(f.read(), filename=path)
         f.close()
     return tree
 
+def createFilePath(filename:str, ext:str='py'):
+    return './' + filename + '.' + ext
 
+def getFileName(path:str):
+    return path.split('\\').pop().rstrip('.py')
 
-def timeFunction(path: str):
-    tree = getTests(path)
-    treeTwo = getTests(path)
-    fileName = path.split('\\').pop().rstrip('.py')
+def createNewFileName(filename:str, flag:str):
+    return  filename + flag
 
-    maxVisitor = inputVisitor(fileName,flag='max')
-    minVisitor = inputVisitor(fileName)
-    newTree = ast.fix_missing_locations(maxVisitor.visit(tree))
-    minTree = ast.fix_missing_locations(minVisitor.visit(treeTwo))
-    p = ".\someFunctionTests2.py"
-    with open(p, "w") as f:
-        f.write(ast.unparse(newTree))
+def createPythonFile(fileName:str, astTree:ast.Module):
+    path = createFilePath(getFileName(fileName))
+    with open(path, "w") as f:
+        f.write(ast.unparse(astTree))
         f.close()
 
-    p = ".\AST_Tree.txt"
-    with open(p, "w") as f:
-        f.write(ast.dump(tree, indent=2))
-        f.close()
+def cleanupPythonFile(fileName:str):
+    path = createFilePath(getFileName(fileName))
+    os.remove(path)
 
-    p = ".\someFunctionTests3.py"
-    with open(p, "w") as f:
-        f.write(ast.unparse(minTree))
-        f.close()
+def timeFunction(programPath:str, unitPath: str):
+    flags = ['min', 'max']
 
-    code = compile(newTree, filename='<String>', mode='exec')
-    env = {}
-    t = timeit.Timer(lambda: exec(code, env))
-    b = timeit.Timer(lambda:os.system('python3 {} {}.perf_test'.format(p,maxVisitor.testClassName)))
+    programFileName = getFileName(programPath)
+    unitFileName = getFileName(unitPath)
+
+    for flag in flags:
+        newProgramFileName = createNewFileName(programFileName, flag)
+        newTestFileName = createNewFileName(unitFileName, flag)
+        #get Trees
+        treeUnit = getAST(unitPath)
+        treeProgram = getAST(programPath)
+
+        #mutate Trees
+        visitor = inputVisitor(programFileName, newProgramFileName, flag)
+        newTree = ast.fix_missing_locations(visitor.visit(treeUnit))
+      
+        #create files for testing
+        createPythonFile(newTestFileName, newTree)
+        createPythonFile(newProgramFileName, treeProgram)
+        #perform tests
+
+        input = ['python3', newTestFileName+'.py', visitor.testClassName+'.perf_test']
+        timeTest2 = timeit.Timer(lambda:subprocess.run(input, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+        print('Flag: {} time:  {}'.format(flag, timeTest2.timeit(10)/10))
+
+
+        #cleanup
+        cleanupPythonFile(newTestFileName)
+        cleanupPythonFile(newProgramFileName)
+        
     
-    #mutate
-    #loop
-    print(t.timeit(1))
-    print(b.timeit(1))

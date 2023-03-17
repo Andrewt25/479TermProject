@@ -1,9 +1,10 @@
 import ast
    
 class inputVisitor(ast.NodeTransformer):
-    def __init__(self, fileName:str, flag:str='min'):
+    def __init__(self, fileName:str, newFileName:str ,flag:str='min'):
       self.flag=flag
-      self.fileName = 'someFunction'
+      self.fileName = fileName
+      self.newFileName = newFileName
     # visiter for functions looks for specific test to mutate
     
     def visit_FunctionDef(self, node: ast.FunctionDef):
@@ -11,12 +12,13 @@ class inputVisitor(ast.NodeTransformer):
             for n in node.body:
                 if(n.__class__ == ast.Assign):
                         n.value = self.__getInput(n.value) 
+            self.perf_node = node
         self.generic_visit(node)
         return node
 
     def visit_Attribute(self, node: ast.Attribute) :
         if(node.value.id == self.fileName):
-            node.value.id = self.fileName + '2'
+            node.value.id = self.newFileName
         return node
     
     def visit_ClassDef(self, node: ast.ClassDef):
@@ -27,10 +29,12 @@ class inputVisitor(ast.NodeTransformer):
     def visit_Import(self, node: ast.Import):
         for alias in node.names:
             if alias.name == self.fileName:
-                alias.name = self.fileName + '2'
+                alias.name = self.newFileName
         self.generic_visit(node)
         return node
 
+    # UTILITY FUNCTIONS
+    
     # returns value for constants
     def __getConstantInput(self, nodeType):
         if self.flag == 'max':
@@ -44,8 +48,6 @@ class inputVisitor(ast.NodeTransformer):
             elif nodeType == int:
                 return 0     
         return '4'
-
-    # UTILITY FUNCTIONS
 
     # add items equal to size to ast list using first item as type to generate input
     # if list is empty uses default constant input
@@ -67,3 +69,4 @@ class inputVisitor(ast.NodeTransformer):
         elif hasattr(node, 'elts'):
             node.elts = self.__getListInput(node.elts)
         return node
+
