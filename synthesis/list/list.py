@@ -21,8 +21,10 @@ class ListTo():
     var_visitor = FindVariableDeclarations(DataType.List)
     var_visitor.visit(self.ast_obj)
     variables = var_visitor.variables
+    # TODO: Right here we can modify n variables, depending on user input.
+    # Deep copy self.ast_obj into a new variable
 
-    # Modify all variables that is a type list to
+    # Modify all variables that is a type list to target data type
     var_transformer = VariableTransformer(variables, DataType.List, self.target_type)
     tree = var_transformer.visit(self.ast_obj)
 
