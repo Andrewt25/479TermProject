@@ -7,14 +7,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
 from synthesis.util import *
 
 
-def append(my_dict: dict, item):
+def program_synthesis_append(my_dict: dict, item):
   if item in my_dict:
     my_dict[item] += 1
   else:
-    my_dict[item] = 0
+    my_dict[item] = 1
 
 
-def append(my_set: set, item):
+def program_synthesis_append(my_set: set, item):
   if item in my_set:
     raise Exception(f'{item} already exists in {my_set}.')
   my_set.add(item)
@@ -55,6 +55,6 @@ class AppendVisitor(ast.NodeTransformer):
       if isinstance(node.value.args[0], ast.Name):
         item = node.value.args[0].id
 
-      return ast.parse(f'append({var}, {item})').body[0]
+      return ast.parse(f'program_synthesis_append({var}, {item})').body[0]
 
     return node
