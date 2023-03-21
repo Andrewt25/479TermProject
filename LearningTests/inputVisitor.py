@@ -5,33 +5,48 @@ class inputVisitor(ast.NodeTransformer):
       self.flag=flag
       self.fileName = fileName
       self.newFileName = newFileName
+      self.importNodes = []
+
     # visiter for functions looks for specific test to mutate
-    
     def visit_FunctionDef(self, node: ast.FunctionDef):
         if(node.name == 'perf_test'):
             for n in node.body:
                 if(n.__class__ == ast.Assign):
-                        n.value = self.__getInput(n.value) 
+                    n.value = self.__getInput(n.value) 
             self.perf_node = node
         self.generic_visit(node)
         return node
 
-    def visit_Attribute(self, node: ast.Attribute) :
-        if(node.value.id == self.fileName):
-            node.value.id = self.newFileName
+    #def visit_Attribute(self, node: ast.Attribute) :
+        #if(node.value.id == self.fileName):
+            #node.value.id = self.newFileName
+        #return node
+    
+    #strip import reference so able to combine modified program
+    #with tests and run as AST
+    def visit_Call(self, node: ast.Call):
+        if(node.func.__class__ == ast.Attribute):
+            if(node.func.value.id == self.fileName):
+                funcName = node.func.attr
+                node.func = ast.Name(id=funcName, ctx=ast.Load())
+        self.generic_visit(node)
         return node
     
     def visit_ClassDef(self, node: ast.ClassDef):
         self.testClassName = node.name
+        self.testBody = node
         self.generic_visit(node)
         return node
     
     def visit_Import(self, node: ast.Import):
-        for alias in node.names:
-            if alias.name == self.fileName:
-                alias.name = self.newFileName
+        self.importNodes.append(node)
         self.generic_visit(node)
         return node
+    def visit_ImportFrom(self, node: ast.ImportFrom):
+        self.importNodes.append(node)
+        self.generic_visit(node)
+        return node
+    
 
     # UTILITY FUNCTIONS
     
