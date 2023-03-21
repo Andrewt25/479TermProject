@@ -3,7 +3,8 @@ import copy
 import sys  
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(file_path))))
 
 from synthesis.datatypes import *
 from synthesis.util import *

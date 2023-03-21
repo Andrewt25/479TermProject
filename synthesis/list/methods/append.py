@@ -2,7 +2,8 @@ import ast
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(file_path)))))
 
 from synthesis.util import *
 
@@ -45,15 +46,19 @@ class AppendVisitor(ast.NodeTransformer):
     if node.value.func.attr == 'append' \
       and get_node_hash(node.value.func.value) in self.valid_vars:
 
-      if isinstance(node.value.func.value, ast.Name):
-        var = node.value.func.value.id
-      else:
-        var = 'self.' + node.value.func.value.attr
+      # Find the variable
+      attribute = node.value.func.value
+      if isinstance(attribute, ast.Name):
+        var = attribute.id
+      if isinstance(attribute, ast.Attribute):
+        var = 'self.' + attribute.attr
 
-      if isinstance(node.value.args[0], ast.Constant):
-        item = node.value.args[0].value
-      if isinstance(node.value.args[0], ast.Name):
-        item = node.value.args[0].id
+      # Find the argument
+      arg = node.value.args[0]
+      if isinstance(arg, ast.Constant):
+        item = arg.value
+      if isinstance(arg, ast.Name):
+        item = arg.id
 
       return ast.parse(f'program_synthesis_append({var}, {item})').body[0]
 
