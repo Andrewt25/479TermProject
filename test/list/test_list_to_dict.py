@@ -13,8 +13,11 @@ class TestUtil(unittest.TestCase):
     print('##### Before:')
     print(ast.unparse(tree))
     self.list = ListTo(tree, DataType.Dict)
-    print('\n##### After:')
-    print(ast.unparse(self.list.modify_ast()))
+    trees = self.list.modify_ast()
+
+    for idx, tree in enumerate(trees):
+      print(f'\n##### After-{idx}:')
+      print(ast.unparse(tree))
 
   def test(self):
     pass

@@ -23,6 +23,29 @@ def get_node_hash(node: ast):
   return ','.join(node_str.split(',')[:-1])
 
 
+def get_attr_variable(attribute: ast.Attribute):
+  match type(attribute):
+    case ast.Name:
+      return attribute.id
+    case ast.Attribute:
+      return f'self.{attribute.attr}'
+    case _:
+      raise Exception(f'{ast.dump(attribute)} type not found.')
+
+
+def get_args(args: ast.arguments):
+  items = list()
+  for arg in args:
+    match type(arg):
+      case ast.Constant:
+        items.append(arg.value)
+      case ast.Name:
+        items.append(arg.id)
+      case _:
+        raise Exception(f'{ast.dump(arg)} type not found.')
+  return items
+
+
 class FindVariableDeclarations(ast.NodeVisitor):
 
   def __init__(self, data_type: DataType):
@@ -41,8 +64,8 @@ class FindVariableDeclarations(ast.NodeVisitor):
 
 class VariableTransformer(ast.NodeTransformer):
 
-  def __init__(self, variables, from_type: DataType, to_type: DataType):
-    self.variables = variables
+  def __init__(self, var, from_type: DataType, to_type: DataType):
+    self.var = var
     self.from_type = get_data_type_str(from_type)
     self.to_type = get_data_type_str(to_type)
 
@@ -53,5 +76,8 @@ class VariableTransformer(ast.NodeTransformer):
     if node.value.func.id != self.from_type:
       return node
     
+    if get_node_hash(node.targets[0]) != self.var:
+      return node
+
     node.value.func.id = self.to_type
     return node
