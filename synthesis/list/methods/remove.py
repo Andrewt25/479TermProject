@@ -12,6 +12,8 @@ def program_synthesis_remove(my_dict: dict, item):
   if item not in my_dict:
     raise Exception(f'{item} does not exist in {my_dict}.')
   my_dict[item] -= 1
+  if my_dict[item] == 0:
+    del my_dict[item]
 
 
 def program_synthesis_remove(my_set: set, item):
