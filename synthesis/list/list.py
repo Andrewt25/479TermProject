@@ -11,6 +11,7 @@ from synthesis.util import *
 from .methods.append import *
 from .methods.count import *
 from .methods.remove import *
+from .methods.for_loop import *
 
 
 class ListTo():
@@ -40,6 +41,9 @@ class ListTo():
 
       remove_visitor = RemoveVisitor(var)
       tree = remove_visitor.visit(tree)
+
+      for_visitor = ForVisitor(var)
+      tree = for_visitor.visit(tree)
 
       trees.append(tree)
 
