@@ -9,10 +9,9 @@ from synthesis.util import *
 
 
 def program_synthesis_remove(my_dict: dict, item):
-  if item in my_dict:
-    my_dict[item] -= 1
-  else:
-    my_dict[item] = 0
+  if item not in my_dict:
+    raise Exception(f'{item} does not exist in {my_dict}.')
+  my_dict[item] -= 1
 
 
 def program_synthesis_remove(my_set: set, item):
