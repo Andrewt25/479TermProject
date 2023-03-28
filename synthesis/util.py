@@ -1,69 +1,83 @@
-# import ast
+import ast
+from .datatypes import *
 
 
-# class ASTKeywordFinder(ast.NodeVisitor):
-#   def __init__(self, ast_search_space) -> None:
-#     self.ast_search_space = ast_search_space
-
-#   def find_assign_call_id(self, keyword) -> list:
-#     visitor = _AssignCallVisitor(keyword)
-#     visitor.visit(self.ast_search_space)
-#     return visitor.node_matches
-
-#   def find_expr_call_attr(self, keyword) -> list:
-#     visitor = _ExprCallAttributeVisitor(keyword)
-#     visitor.visit(self.ast_search_space)
-#     return visitor.node_matches
-
-#   def find_return_call_attribute_attr(self, keyword) -> list:
-#     visitor = _ReturnCallAttributeVisitor(keyword)
-#     visitor.visit(self.ast_search_space)
-#     return visitor.node_matches
+def get_data_type_str(data_type: DataType):
+  match(data_type):
+    case DataType.List:
+      return 'list'
+    case DataType.Dict:
+      return 'dict'
+    case DataType.Set:
+      return 'set'
 
 
-
-# class _AssignCallVisitor(ast.NodeVisitor):
-#   ''' Look for ast.Assign nodes with a function value with a specific id'''
-#   def __init__(self, find_value_func_id):
-#     self.find_value_func_id = find_value_func_id
-#     self.node_matches = list()
-
-#   def visit_Assign(self, node: ast.Assign):
-#     if not isinstance(node.value, ast.Call):
-#       return
-
-#     if node.value.func.id == self.find_value_func_id:
-#       self.node_matches.append(node)
+def is_ast_node_equal(ast_node_a, ast_node_b):
+  node_a = ast.dump(ast_node_a)
+  node_b = ast.dump(ast_node_b)
+  return node_a == node_b 
 
 
-# class _ExprCallAttributeVisitor(ast.NodeVisitor):
-#   ''' Look for ast.Expr nodes with a function value with a specific attr'''
-#   def __init__(self, find_attr):
-#     self.find_attr = find_attr
-#     self.node_matches = list()
+def get_node_hash(node: ast):
+  node_str = ast.dump(node)
+  return ','.join(node_str.split(',')[:-1])
 
-#   def visit_Expr(self, node: ast.Expr):
-#     if not isinstance(node.value, ast.Call):
-#       return
+
+def get_attr_variable(attribute: ast.Attribute):
+  match type(attribute):
+    case ast.Name:
+      return attribute.id
+    case ast.Attribute:
+      return f'self.{attribute.attr}'
+    case _:
+      raise Exception(f'{ast.dump(attribute)} type not found.')
+
+
+def get_args(args: ast.arguments):
+  items = list()
+  for arg in args:
+    match type(arg):
+      case ast.Constant:
+        items.append(arg.value)
+      case ast.Name:
+        items.append(arg.id)
+      case _:
+        raise Exception(f'{ast.dump(arg)} type not found.')
+  return items
+
+
+class FindVariableDeclarations(ast.NodeVisitor):
+
+  def __init__(self, data_type: DataType):
+    self.variables = set()
+    self.data_type = get_data_type_str(data_type)
+
+  def visit_Assign(self, node: ast.Assign):
+    if not isinstance(node.value, ast.Call):
+      return
     
-#     if not isinstance(node.value.func, ast.Attribute):
-#       return
+    if node.value.func.id != self.data_type:
+      return
+
+    self.variables.add(get_node_hash(node.targets[0]))
+
+
+class VariableTransformer(ast.NodeTransformer):
+
+  def __init__(self, var, from_type: DataType, to_type: DataType):
+    self.var = var
+    self.from_type = get_data_type_str(from_type)
+    self.to_type = get_data_type_str(to_type)
+
+  def visit_Assign(self, node: ast.Assign):
+    if not isinstance(node.value, ast.Call):
+      return node
     
-#     if node.value.func.attr == self.find_attr:
-#       self.node_matches.append(node)
-
-
-# class _ReturnCallAttributeVisitor(ast.NodeVisitor):
-#   def __init__(self, find_attr) -> None:
-#     self.find_attr = find_attr
-#     self.node_matches = list()
-
-#   def visit_Return(self, node: ast.Return):
-#     if not isinstance(node.value, ast.Call):
-#       return
+    if node.value.func.id != self.from_type:
+      return node
     
-#     if not isinstance(node.value.func, ast.Attribute):
-#       return
+    if get_node_hash(node.targets[0]) != self.var:
+      return node
 
-#     if node.value.func.attr == self.find_attr:
-#       self.node_matches.append(node)
+    node.value.func.id = self.to_type
+    return node
