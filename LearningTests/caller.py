@@ -1,3 +1,6 @@
 from timeitTesting import timeFunction
 
-timeFunction('.\someFunctionTests.py')
+timeFunction('.\someFunction.py', '.\someFunctionTests.py')
+
+
+
