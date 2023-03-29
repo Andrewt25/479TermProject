@@ -19,7 +19,10 @@ class ListTo():
     self.ast_obj = ast_obj
     self.target_type = target_type
 
-  def modify_ast(self) -> ast:
+  def modify_ast(self) -> list:
+    if self.target_type == DataType.List:
+      return []
+
     # Find all variables that is type list
     var_visitor = FindVariableDeclarations(DataType.List)
     var_visitor.visit(self.ast_obj)
