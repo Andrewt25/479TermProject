@@ -25,17 +25,9 @@ class AppendVisitor(ast.NodeTransformer):
 
   def __init__(self, valid_var):
     self.valid_var = valid_var
-    self.import_append = ast.parse('from synthesis.list.methods.append import *').body[0]
 
   def visit_Module(self, node: ast.Module):
-    for body in node.body:
-      if isinstance(body, ast.ClassDef):
-        node.body.insert(0, self.import_append)
-        return self.generic_visit(node)
-      
-      if is_ast_node_equal(body, self.import_append):
-        break
-    
+    add_import(node, 'from synthesis.list.methods.append import *')
     return self.generic_visit(node)
 
   def visit_Expr(self, node: ast.Expr):

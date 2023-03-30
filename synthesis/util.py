@@ -46,6 +46,17 @@ def get_args(args: ast.arguments):
   return items
 
 
+def add_import(node: ast.Module, import_str: str):
+  import_node = ast.parse(import_str).body[0]
+  for body in node.body:
+    if isinstance(body, ast.ClassDef):
+      node.body.insert(0, import_node)
+      break
+    
+    if is_ast_node_equal(body, import_node):
+      break
+
+
 class FindVariableDeclarations(ast.NodeVisitor):
 
   def __init__(self, data_type: DataType):
