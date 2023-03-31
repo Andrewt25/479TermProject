@@ -1,8 +1,8 @@
 import unittest
-import someFunction
-import someFunction2
+import LearningTests.someFunction
+import LearningTests.someFunction2
 import timeit
-from otherExamplesAST.example2 import Example
+from LearningTests.otherExamplesAST.example2 import Example
 
 class TestStringMethods(unittest.TestCase):
     def test_valid(self):
