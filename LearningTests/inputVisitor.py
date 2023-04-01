@@ -9,11 +9,18 @@ class inputVisitor(ast.NodeTransformer):
 
     # visiter for functions looks for specific test to mutate
     def visit_FunctionDef(self, node: ast.FunctionDef):
+        nodesToCopy =[]
         if(node.name == 'perf_test'):
             for n in node.body:
                 if(n.__class__ == ast.Assign):
                     n.value = self.__getInput(n.value) 
+                if(n.value.__class__ == ast.Call and n.value.func.__class__ == ast.Attribute):
+                    if(n.value.func.value.id != 'self'):
+                        nodesToCopy.append(n)
             self.perf_node = node
+        for n in nodesToCopy:
+            new_stmt = ast.Expr(value=ast.Str(s='new statement'))
+            node.body.insert(node.body.index(n), n)
         self.generic_visit(node)
         return node
 
@@ -31,7 +38,7 @@ class inputVisitor(ast.NodeTransformer):
                 node.func = ast.Name(id=funcName, ctx=ast.Load())
         self.generic_visit(node)
         return node
-    
+
     def visit_ClassDef(self, node: ast.ClassDef):
         self.testClassName = node.name
         self.testBody = node
