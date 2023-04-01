@@ -6,6 +6,7 @@ file_path = os.path.abspath(__file__)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(file_path)))))
 
 from synthesis.util import *
+from synthesis.datatypes import *
 
 
 def program_synthesis_count(my_dict: dict, item):
@@ -18,10 +19,14 @@ def program_synthesis_count(my_set: set, item):
 
 class CountVisitor(ast.NodeTransformer):
 
-  def __init__(self, valid_var):
+  def __init__(self, valid_var, target_type: DataType):
     self.valid_var = valid_var
+    self.target_type = target_type
+    self.ignored_types = {}
 
   def visit_Module(self, node: ast.Module):
+    if self.target_type in self.ignored_types:
+      return node
     add_import(node, 'from synthesis.list.methods.count import *')
     return self.generic_visit(node)
 

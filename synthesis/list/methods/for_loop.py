@@ -6,6 +6,7 @@ file_path = os.path.abspath(__file__)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(file_path)))))
 
 from synthesis.util import *
+from synthesis.datatypes import *
 
 
 def program_synthesis_for_loop(my_dict: dict):
@@ -14,16 +15,19 @@ def program_synthesis_for_loop(my_dict: dict):
       yield key
 
 
-def program_synthesis_for_loop(my_set: set):
-  return my_set
-
-
 class ForVisitor(ast.NodeTransformer):
 
-  def __init__(self, valid_var):
+  def __init__(self, valid_var, target_type: DataType):
     self.valid_var = valid_var
+    self.target_type = target_type
+    self.ignored_types = {
+      DataType.Set
+    }
 
   def visit_Module(self, node: ast.Module):
+    if self.target_type in self.ignored_types:
+      return node
+
     add_import(node, 'from synthesis.list.methods.for_loop import *')
     return self.generic_visit(node)
 
