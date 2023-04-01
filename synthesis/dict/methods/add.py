@@ -4,7 +4,13 @@ from synthesis.datatypes import *
 
 
 def program_synthesis_add(my_list: list, key, value):
-  my_list.append((key, value))
+  for idx, k, _ in enumerate(my_list):
+    if k == key:
+      my_list[idx] = (key, value)
+      return
+  
+  my_list.append((key, value)) # If key does not exist
+
 
 
 class AddVisitor(ast.NodeTransformer):
