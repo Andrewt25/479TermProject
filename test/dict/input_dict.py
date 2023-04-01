@@ -18,9 +18,9 @@ class Example():
     result = self.dict.pop(key)
     return result
 
-  # def get(self, key):
-  #   result = self.dict.get(key)
-  #   return result
+  def get(self, key):
+    result = self.dict.get(key)
+    return result
 
   # def items(self):
   #   for item in self.dict.items():

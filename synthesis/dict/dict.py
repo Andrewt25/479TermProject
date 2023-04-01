@@ -5,6 +5,7 @@ from synthesis.util import *
 from .methods.add import *
 from .methods.remove import *
 from .methods.pop import *
+from .methods.get import *
 
 
 class DictTo():
@@ -41,8 +42,8 @@ class DictTo():
       pop_visitor = PopVisitor(var, target_type)
       tree = pop_visitor.visit(tree)
 
-      # for_visitor = ForVisitor(var, target_type)
-      # tree = for_visitor.visit(tree)
+      get_visitor = GetVisitor(var, target_type)
+      tree = get_visitor.visit(tree)
 
       trees.append(tree)
 
