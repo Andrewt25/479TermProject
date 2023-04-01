@@ -20,6 +20,7 @@ class Example():
 
   def get(self, key):
     result = self.dict.get(key)
+    result = self.dict[key]
     return result
 
   # def items(self):
