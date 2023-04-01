@@ -23,20 +23,23 @@ class Example():
     result = self.dict[key]
     return result
 
-  # def items(self):
-  #   for item in self.dict.items():
-  #     temp = item # tuple
-  #     temp_k = item[0]
-  #     temp_v = item[1]
+  def items(self):
+    [item for item in self.dict.items()]
+    for item in self.dict.items():
+      temp = item # tuple
+      temp_k = item[0]
+      temp_v = item[1]
 
-  #   for key, value in self.dict.items():
-  #     temp_k = key
-  #     temp_v = value
+    for key, value in self.dict.items():
+      temp_k = key
+      temp_v = value
 
-  # def keys(self):
-  #   for key in self.dict.keys():
-  #     temp_k = key # unique
+  def keys(self):
+    [key for key in self.dict.keys()]
+    for key in self.dict.keys():
+      temp_k = key # unique
 
-  # def values(self):
-  #   for value in self.dict.values():
-  #     temp_v = value # duplicates allowed
+  def values(self):
+    [value for value in self.dict.values()]
+    for value in self.dict.values():
+      temp_v = value # duplicates allowed

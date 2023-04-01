@@ -6,7 +6,9 @@ from .methods.add import *
 from .methods.remove import *
 from .methods.pop import *
 from .methods.get import *
-
+from .methods.items import *
+from .methods.keys import *
+from .methods.values import *
 
 class DictTo():
 
@@ -44,6 +46,15 @@ class DictTo():
 
       get_visitor = GetVisitor(var, target_type)
       tree = get_visitor.visit(tree)
+
+      items_visitor = ItemsVisitor(var, target_type)
+      tree = items_visitor.visit(tree)
+
+      keys_visitor = KeysVisitor(var, target_type)
+      tree = keys_visitor.visit(tree)
+
+      values_visitor = ValuesVisitor(var, target_type)
+      tree = values_visitor.visit(tree)
 
       trees.append(tree)
 
