@@ -13,9 +13,10 @@ class Example():
   def remove(self, key):
     del self.dict[key]
 
-  # def pop(self, key):
-  #   result = self.dict.pop(key)
-  #   return result
+  def pop(self, key):
+    self.dict.pop(key)
+    result = self.dict.pop(key)
+    return result
 
   # def get(self, key):
   #   result = self.dict.get(key)

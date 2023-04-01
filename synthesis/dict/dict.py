@@ -4,6 +4,7 @@ from synthesis.datatypes import *
 from synthesis.util import *
 from .methods.add import *
 from .methods.remove import *
+from .methods.pop import *
 
 
 class DictTo():
@@ -37,8 +38,8 @@ class DictTo():
       remove_visitor = RemoveVisitor(var, target_type)
       tree = remove_visitor.visit(tree)
 
-      # remove_visitor = RemoveVisitor(var, target_type)
-      # tree = remove_visitor.visit(tree)
+      pop_visitor = PopVisitor(var, target_type)
+      tree = pop_visitor.visit(tree)
 
       # for_visitor = ForVisitor(var, target_type)
       # tree = for_visitor.visit(tree)
