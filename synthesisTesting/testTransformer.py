@@ -1,4 +1,5 @@
 import ast
+import copy
    
 class testTransformer(ast.NodeTransformer):
     def __init__(self, fileName:str ,count:int=1):
@@ -20,8 +21,11 @@ class testTransformer(ast.NodeTransformer):
             self.perf_node = node
         # duplicate function calls
         for n in nodesToCopy:
-            for i in range(self.count):
-             node.body.insert(node.body.index(n), n)
+            for i in range(1,self.count):
+                nodeCopy = copy.deepcopy(n)
+                for j in range(len(nodeCopy.value.args)):
+                    nodeCopy.value.args[j].value = nodeCopy.value.args[j].value + i
+                node.body.insert(node.body.index(n), nodeCopy)
         self.generic_visit(node)
         return node
     

@@ -32,32 +32,44 @@ def testDriver(programPath:str, unitPath: str):
 
     
     astsToTest = [getAST(programPath)]
+    topPerformer =()
     index = 1
 
     while True:
+        topIterPerformer = ()
         for modAst in astsToTest:
             # warmup
-            combineAndExecute(modAst, performanceTests[0])
+            combineAndExecute(copy.deepcopy(modAst), performanceTests[0])
+            times = []
             for test in performanceTests:
-                combineAndExecute(modAst, test)
+                times = times + combineAndExecute(copy.deepcopy(modAst), test)
                 #record time
                 #output
+            if len(times) > 0:
+                rate = avgGrowthRate(times)
+                topIterPerformer = comparePerformance(topIterPerformer, rate, modAst)
+
+        topPerformer = comparePerformance(topPerformer, topIterPerformer[1], topIterPerformer[0])
+
         # reset list after tests
+        print(len(astsToTest))
         astsToTest = []
         for type in DataType:
-            treeProgram = getAST(programPath)
-            modAsts = ListTo(treeProgram, type).modify_ast()
-            astsToTest = astsToTest + modAsts
+            if(len(topIterPerformer) == 2):
+                treeProgram = topIterPerformer[0]
+                modAsts = ListTo(copy.deepcopy(treeProgram)).modify_ast(type)
+                astsToTest = astsToTest + modAsts
+                if(len(modAsts) > 0):
+                    with open("ast"+type.name+".txt", "w") as f:
+                        f.write(ast.unparse(modAsts[0]))
+                        f.close()
 
         index = index + 1
         # program completes at a depth of 50 or all branches explored
         if astsToTest == [] or index == 50:
             break
+    print(topPerformer[1])
         
-
-#TODO handle import issue
-    # Potentially append filePath all imports
-    # temp copy into working dir
 
 def combineAndExecute(modAst, test):
     # combine imports and body of modified program and test
@@ -74,12 +86,24 @@ def combineAndExecute(modAst, test):
     modAst.body.append(assign)
     modAst.body.append(call_test)
     modAst = ast.fix_missing_locations(modAst)
+    with open("astExecute.txt", "w") as f:
+        f.write(ast.unparse(modAst))
+        f.close()
 
     code = compile(modAst, filename='<ast>', mode='exec')
     env = {}
     t = timeit.Timer(lambda:exec(code, env))
-    print(t.timeit(10)/10)
+    try:  
+        return [t.timeit(10)/10]
+    except:
+        return []
+
 
 
 if __name__ == '__main__':
-    testDriver('..\LearningTests\otherExamplesAST\example.py', '..\LearningTests\someFunctionTests.py')
+    args = sys.argv[1:]
+    if(len(args) != 2):
+        print("Unexpected number of arguments expected 2 got", len(args))
+    else:
+        testDriver(args[0],args[1])
+        #testDriver('..\LearningTests\otherExamplesAST\example.py', '..\LearningTests\someFunctionTests.py')

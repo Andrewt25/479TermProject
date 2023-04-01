@@ -2,6 +2,7 @@ class Example:
   def __init__(self):
     # self.collection = set()
     self.collection = list()
+    self.b = list()
 
   def add(self, item):
     # self.collection.add(item)
@@ -14,6 +15,10 @@ class Example:
     if self.exist(item):
       return item
     return None
+  
+  def delete(self, item):
+    if self.exist(item):
+      self.collection.remove(item)
 
   def find2(self, item):
     return item if self.exist(item) else None

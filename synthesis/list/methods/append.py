@@ -3,18 +3,29 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
+def program_synthesis_append(my_set: set, item):
+  if item in my_set:
+    raise Exception(f'{item} already exists in {my_set}.')
+  my_set.add(item)
+
 def program_synthesis_append(my_dict: dict, item):
   if item in my_dict:
     my_dict[item] += 1
   else:
     my_dict[item] = 1
 
-
-def program_synthesis_append(my_set: set, item):
-  if item in my_set:
-    raise Exception(f'{item} already exists in {my_set}.')
-  my_set.add(item)
-
+def program_synthesis_append(my_collection, item):
+  collectionType = my_collection.__class__
+  if(collectionType == dict):
+    if item in my_collection:
+      my_collection[item] += 1
+    else:
+      my_collection[item] = 1
+  elif(collectionType == set):
+    if item in my_collection:
+      raise Exception(f'{item} already exists in {my_collection}.')
+    my_collection.add(item)
+  
 
 class AppendVisitor(ast.NodeTransformer):
 

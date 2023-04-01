@@ -1,4 +1,6 @@
 import os as np
+from LearningTests.otherExamplesAST.example import Example
 
-def doAthing(t:str, c:int):
-    return (t.upper(), c + 1)
+def doAthing(a:Example):
+    r = a.find1(45)
+    return r

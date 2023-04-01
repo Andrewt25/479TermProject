@@ -16,6 +16,19 @@ def program_synthesis_remove(my_set: set, item):
     raise Exception(f'{item} does not exists in {my_set}.')
   my_set.remove(item)
 
+def program_synthesis_remove(my_collection, item):
+  collectionType = my_collection.__class__
+  if(collectionType == dict):
+    if item not in my_collection:
+        raise Exception(f'{item} does not exist in {my_collection}.')
+    my_collection[item] -= 1
+    if my_collection[item] == 0:
+      del my_collection[item]
+  elif(collectionType == set):
+    if item not in my_collection:
+      raise Exception(f'{item} does not exists in {my_collection}.')
+    my_collection.remove(item)
+
 
 class RemoveVisitor(ast.NodeTransformer):
 

@@ -10,6 +10,13 @@ def program_synthesis_count(my_dict: dict, item):
 def program_synthesis_count(my_set: set, item):
   return 1 if item in my_set else 0
 
+def program_synthesis_count(my_collection, item):
+  collectionType = my_collection.__class__
+  if(collectionType == dict):
+    return my_collection[item] if item in my_collection else 0
+  elif(collectionType == set):
+    return 1 if item in my_collection else 0
+
 
 class CountVisitor(ast.NodeTransformer):
 
