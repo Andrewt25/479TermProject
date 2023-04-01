@@ -2,7 +2,7 @@ import ast
 import copy
 from synthesis.datatypes import *
 from synthesis.util import *
-from .methods.add import *
+from .methods.add_or_update import *
 from .methods.remove import *
 from .methods.pop import *
 from .methods.get import *
@@ -35,7 +35,7 @@ class DictTo():
       var_transformer = VariableTransformer(var, self.type, target_type)
       tree = var_transformer.visit(tree)
 
-      add_visitor = AddVisitor(var, target_type)
+      add_visitor = AddOrUpdateVisitor(var, target_type)
       tree = add_visitor.visit(tree)
       
       remove_visitor = RemoveVisitor(var, target_type)

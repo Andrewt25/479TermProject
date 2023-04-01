@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_add(my_list: list, key, value):
+def program_synthesis_add_or_update(my_list: list, key, value):
   for idx, k, _ in enumerate(my_list):
     if k == key:
       my_list[idx] = (key, value)
@@ -13,7 +13,7 @@ def program_synthesis_add(my_list: list, key, value):
 
 
 
-class AddVisitor(ast.NodeTransformer):
+class AddOrUpdateVisitor(ast.NodeTransformer):
 
   def __init__(self, valid_var, target_type: DataType):
     self.valid_var = valid_var
@@ -23,7 +23,7 @@ class AddVisitor(ast.NodeTransformer):
   def visit_Module(self, node: ast.Module):
     if self.target_type in self.ignored_types:
       return node
-    add_import(node, 'from synthesis.dict.methods.add import *')
+    add_import(node, 'from synthesis.dict.methods.add_or_update import *')
     return self.generic_visit(node)
 
   def visit_Assign(self, node: ast.Assign):
@@ -34,4 +34,4 @@ class AddVisitor(ast.NodeTransformer):
     var = get_attr_variable(node.targets[0].value)
     key = node.targets[0].slice.id
     value = ast.unparse(node.value)
-    return ast.parse(f'program_synthesis_add({var}, {key}, {value})').body[0]
+    return ast.parse(f'program_synthesis_add_or_update({var}, {key}, {value})').body[0]

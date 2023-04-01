@@ -3,7 +3,7 @@ from synthesis.dict.methods.keys import *
 from synthesis.dict.methods.get import *
 from synthesis.dict.methods.pop import *
 from synthesis.dict.methods.remove import *
-from synthesis.dict.methods.add import *
+from synthesis.dict.methods.add_or_update import *
 
 class Example:
 
@@ -11,11 +11,11 @@ class Example:
         self.dict = list()
 
     def add(self, key, value):
-        program_synthesis_add(self.dict, key, value)
-        program_synthesis_add(self.dict, key, 1)
-        program_synthesis_add(self.dict, key, 'a')
-        program_synthesis_add(self.dict, key, 'abc')
-        program_synthesis_add(self.dict, key, (1, 2))
+        program_synthesis_add_or_update(self.dict, key, value)
+        program_synthesis_add_or_update(self.dict, key, 1)
+        program_synthesis_add_or_update(self.dict, key, 'a')
+        program_synthesis_add_or_update(self.dict, key, 'abc')
+        program_synthesis_add_or_update(self.dict, key, (1, 2))
 
     def remove(self, key):
         program_synthesis_remove(self.dict, key)
