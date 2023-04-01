@@ -9,14 +9,14 @@ class Example:
         self.dict = dict()
 
     def append(self, item):
-        program_synthesis_append(self.list, item)
+        psynth_list_to_set_append(self.list, item)
         self.dict[item] = 1
 
     def count(self, item):
-        program_synthesis_count(self.list, item)
+        psynth_list_to_set_count(self.list, item)
 
     def remove(self, item):
-        program_synthesis_remove(self.list, item)
+        psynth_list_to_set_count(self.list, item)
 
     def for_loop(self):
         [item for item in self.list]

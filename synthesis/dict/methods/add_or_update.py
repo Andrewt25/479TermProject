@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_add_or_update(my_list: list, key, value):
+def psynth_dict_to_list_add_or_update(my_list: list, key, value):
   for idx, k, _ in enumerate(my_list):
     if k == key:
       my_list[idx] = (key, value)
@@ -34,4 +34,4 @@ class AddOrUpdateVisitor(ast.NodeTransformer):
     var = get_attr_variable(node.targets[0].value)
     key = node.targets[0].slice.id
     value = ast.unparse(node.value)
-    return ast.parse(f'program_synthesis_add_or_update({var}, {key}, {value})').body[0]
+    return ast.parse(f'psynth_dict_to_list_add_or_update({var}, {key}, {value})').body[0]

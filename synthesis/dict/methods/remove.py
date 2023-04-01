@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_remove(my_list: list, key):
+def psynth_dict_to_list_remove(my_list: list, key):
   for idx, k, _ in enumerate(my_list):
     if k == key: # key is unique
       del my_list[idx]
@@ -30,7 +30,7 @@ class RemoveVisitor(ast.NodeTransformer):
 
     var = get_attr_variable(node.targets[0].value)
     key = node.targets[0].slice.id
-    return ast.parse(f'program_synthesis_remove({var}, {key})').body[0]
+    return ast.parse(f'psynth_dict_to_list_remove({var}, {key})').body[0]
 
 
 

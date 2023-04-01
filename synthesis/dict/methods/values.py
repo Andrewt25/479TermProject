@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_values(my_list: list):
+def psynth_dict_to_list_values(my_list: list):
   for _, v in my_list:
     yield v
 
@@ -28,5 +28,5 @@ class ValuesVisitor(ast.NodeTransformer):
       return self.generic_visit(node)
   
     var = get_attr_variable(node.func.value)
-    new_node = ast.parse(f'program_synthesis_values({var})').body[0].value
+    new_node = ast.parse(f'psynth_dict_to_list_values({var})').body[0].value
     return self.generic_visit(new_node)

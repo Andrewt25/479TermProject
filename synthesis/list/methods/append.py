@@ -3,29 +3,18 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_append(my_set: set, item):
-  if item in my_set:
-    raise Exception(f'{item} already exists in {my_set}.')
-  my_set.add(item)
-
-def program_synthesis_append(my_dict: dict, item):
+def psynth_list_to_dict_append(my_dict: dict, item):
   if item in my_dict:
     my_dict[item] += 1
   else:
     my_dict[item] = 1
 
-def program_synthesis_append(my_collection, item):
-  collectionType = my_collection.__class__
-  if(collectionType == dict):
-    if item in my_collection:
-      my_collection[item] += 1
-    else:
-      my_collection[item] = 1
-  elif(collectionType == set):
-    if item in my_collection:
-      raise Exception(f'{item} already exists in {my_collection}.')
-    my_collection.add(item)
-  
+
+def psynth_list_to_set_append(my_set: set, item):
+  if item in my_set:
+    raise Exception(f'{item} already exists in {my_set}.')
+  my_set.add(item)
+
 
 class AppendVisitor(ast.NodeTransformer):
 
@@ -51,6 +40,10 @@ class AppendVisitor(ast.NodeTransformer):
       var = get_attr_variable(node.value.func.value)
       item = get_args(node.value.args)[0]
 
-      return ast.parse(f'program_synthesis_append({var}, {item})').body[0]
+      match (self.target_type):
+        case DataType.Dict:
+          return ast.parse(f'psynth_list_to_dict_append({var}, {item})').body[0]
+        case DataType.Set:
+          return ast.parse(f'psynth_list_to_set_append({var}, {item})').body[0]
 
     return node

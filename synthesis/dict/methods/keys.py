@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_keys(my_list: list):
+def psynth_dict_to_list_keys(my_list: list):
   for k, _ in my_list:
     yield k
 
@@ -28,5 +28,5 @@ class KeysVisitor(ast.NodeTransformer):
       return self.generic_visit(node)
   
     var = get_attr_variable(node.func.value)
-    new_node = ast.parse(f'program_synthesis_keys({var})').body[0].value
+    new_node = ast.parse(f'psynth_dict_to_list_keys({var})').body[0].value
     return self.generic_visit(new_node)

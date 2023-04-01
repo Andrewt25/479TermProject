@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_get(my_list: list, key):
+def psynth_dict_to_list_get(my_list: list, key):
   for k, v in my_list:
     if k == key: # key is unique
       return v
@@ -30,7 +30,7 @@ class GetVisitor(ast.NodeTransformer):
   
     var = get_attr_variable(node.func.value)
     key = node.args[0].id
-    new_node = ast.parse(f'program_synthesis_get({var}, {key})').body[0].value
+    new_node = ast.parse(f'psynth_dict_to_list_get({var}, {key})').body[0].value
     return self.generic_visit(new_node)
 
   def visit_Subscript(self, node: ast.Subscript):
@@ -40,5 +40,5 @@ class GetVisitor(ast.NodeTransformer):
 
     var = get_attr_variable(node.value)
     key = node.slice.id
-    new_node = ast.parse(f'program_synthesis_get({var}, {key})').body[0].value
+    new_node = ast.parse(f'psynth_dict_to_list_get({var}, {key})').body[0].value
     return self.generic_visit(new_node)

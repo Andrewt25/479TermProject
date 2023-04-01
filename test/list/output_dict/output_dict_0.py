@@ -10,19 +10,19 @@ class Example:
         self.dict = dict()
 
     def append(self, item):
-        program_synthesis_append(self.list, item)
+        psynth_list_to_dict_append(self.list, item)
         self.dict[item] = 1
 
     def count(self, item):
-        program_synthesis_count(self.list, item)
+        psynth_list_to_dict_count(self.list, item)
 
     def remove(self, item):
-        program_synthesis_remove(self.list, item)
+        psynth_list_to_dict_count(self.list, item)
 
     def for_loop(self):
-        [item for item in program_synthesis_for_loop(self.list)]
+        [item for item in psynth_list_to_dict_for_loop(self.list)]
         count_items = 0
-        for item in program_synthesis_for_loop(self.list):
+        for item in psynth_list_to_dict_for_loop(self.list):
             count_items += 1
 
     def foo(self):

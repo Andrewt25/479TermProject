@@ -3,7 +3,7 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_for_loop(my_dict: dict):
+def psynth_list_to_dict_for_loop(my_dict: dict):
   for key, value in my_dict.items():
     for _ in range(value):
       yield key
@@ -28,7 +28,9 @@ class ForVisitor(ast.NodeTransformer):
       return self.generic_visit(node)
     
     var = get_attr_variable(node.iter)
-    node.iter = ast.parse(f'program_synthesis_for_loop({var})').body[0].value
+    match (self.target_type):
+      case DataType.Dict:
+        node.iter = ast.parse(f'psynth_list_to_dict_for_loop({var})').body[0].value
     return self.generic_visit(node)
 
   def visit_comprehension(self, node: ast.comprehension):
@@ -36,5 +38,7 @@ class ForVisitor(ast.NodeTransformer):
       return self.generic_visit(node)
     
     var = get_attr_variable(node.iter)
-    node.iter = ast.parse(f'program_synthesis_for_loop({var})').body[0].value
+    match (self.target_type):
+      case DataType.Dict:
+        node.iter = ast.parse(f'psynth_list_to_dict_for_loop({var})').body[0].value
     return self.generic_visit(node)

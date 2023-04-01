@@ -11,23 +11,23 @@ class Example:
         self.dict = list()
 
     def add(self, key, value):
-        program_synthesis_add_or_update(self.dict, key, value)
-        program_synthesis_add_or_update(self.dict, key, 1)
-        program_synthesis_add_or_update(self.dict, key, 'a')
-        program_synthesis_add_or_update(self.dict, key, 'abc')
-        program_synthesis_add_or_update(self.dict, key, (1, 2))
+        psynth_dict_to_list_add_or_update(self.dict, key, value)
+        psynth_dict_to_list_add_or_update(self.dict, key, 1)
+        psynth_dict_to_list_add_or_update(self.dict, key, 'a')
+        psynth_dict_to_list_add_or_update(self.dict, key, 'abc')
+        psynth_dict_to_list_add_or_update(self.dict, key, (1, 2))
 
     def remove(self, key):
-        program_synthesis_remove(self.dict, key)
+        psynth_dict_to_list_remove(self.dict, key)
 
     def pop(self, key):
-        program_synthesis_pop(self.dict, key)
-        result = program_synthesis_pop(self.dict, key)
+        psynth_dict_to_list_pop(self.dict, key)
+        result = psynth_dict_to_list_pop(self.dict, key)
         return result
 
     def get(self, key):
-        result = program_synthesis_get(self.dict, key)
-        result = program_synthesis_get(self.dict, key)
+        result = psynth_dict_to_list_get(self.dict, key)
+        result = psynth_dict_to_list_get(self.dict, key)
         return result
 
     def items(self):
@@ -41,11 +41,11 @@ class Example:
             temp_v = value
 
     def keys(self):
-        [key for key in program_synthesis_keys(self.dict)]
-        for key in program_synthesis_keys(self.dict):
+        [key for key in psynth_dict_to_list_keys(self.dict)]
+        for key in psynth_dict_to_list_keys(self.dict):
             temp_k = key
 
     def values(self):
-        [value for value in program_synthesis_values(self.dict)]
-        for value in program_synthesis_values(self.dict):
+        [value for value in psynth_dict_to_list_values(self.dict)]
+        for value in psynth_dict_to_list_values(self.dict):
             temp_v = value

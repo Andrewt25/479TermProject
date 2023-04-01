@@ -3,19 +3,12 @@ from synthesis.util import *
 from synthesis.datatypes import *
 
 
-def program_synthesis_count(my_dict: dict, item):
+def psynth_list_to_dict_count(my_dict: dict, item):
   return my_dict[item] if item in my_dict else 0
 
 
-def program_synthesis_count(my_set: set, item):
+def psynth_list_to_set_count(my_set: set, item):
   return 1 if item in my_set else 0
-
-def program_synthesis_count(my_collection, item):
-  collectionType = my_collection.__class__
-  if(collectionType == dict):
-    return my_collection[item] if item in my_collection else 0
-  elif(collectionType == set):
-    return 1 if item in my_collection else 0
 
 
 class CountVisitor(ast.NodeTransformer):
@@ -42,6 +35,10 @@ class CountVisitor(ast.NodeTransformer):
       var = get_attr_variable(node.value.func.value)
       item = get_args(node.value.args)[0]
 
-      return ast.parse(f'program_synthesis_count({var}, {item})').body[0]
+      match (self.target_type):
+        case DataType.Dict:
+          return ast.parse(f'psynth_list_to_dict_count({var}, {item})').body[0]
+        case DataType.Set:
+          return ast.parse(f'psynth_list_to_set_count({var}, {item})').body[0]
 
     return node

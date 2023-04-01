@@ -27,9 +27,9 @@ class Example:
 
     def foo(self):
         d = dict()
-        program_synthesis_append(d, 1)
-        program_synthesis_count(d, 1)
-        program_synthesis_remove(d, 1)
-        [item for item in program_synthesis_for_loop(d)]
-        for item in program_synthesis_for_loop(d):
+        psynth_list_to_dict_append(d, 1)
+        psynth_list_to_dict_count(d, 1)
+        psynth_list_to_dict_count(d, 1)
+        [item for item in psynth_list_to_dict_for_loop(d)]
+        for item in psynth_list_to_dict_for_loop(d):
             pass
