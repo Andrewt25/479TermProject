@@ -1,10 +1,4 @@
 import ast
-import sys
-import os
-
-file_path = os.path.abspath(__file__)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(file_path)))))
-
 from synthesis.util import *
 from synthesis.datatypes import *
 
