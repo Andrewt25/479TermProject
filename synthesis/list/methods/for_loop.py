@@ -14,9 +14,7 @@ class ForVisitor(ast.NodeTransformer):
   def __init__(self, valid_var, target_type: DataType):
     self.valid_var = valid_var
     self.target_type = target_type
-    self.ignored_types = {
-      DataType.Set
-    }
+    self.ignored_types = { DataType.Set }
 
   def visit_Module(self, node: ast.Module):
     if self.target_type in self.ignored_types:

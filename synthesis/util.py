@@ -64,7 +64,8 @@ class FindVariableDeclarations(ast.NodeVisitor):
     self.data_type = get_data_type_str(data_type)
 
   def visit_Assign(self, node: ast.Assign):
-    if not isinstance(node.value, ast.Call):
+    if not isinstance(node.value, ast.Call) \
+      or not isinstance(node.value.func, ast.Name):
       return
     
     if node.value.func.id != self.data_type:
@@ -81,7 +82,8 @@ class VariableTransformer(ast.NodeTransformer):
     self.to_type = get_data_type_str(to_type)
 
   def visit_Assign(self, node: ast.Assign):
-    if not isinstance(node.value, ast.Call):
+    if not isinstance(node.value, ast.Call) \
+      or not isinstance(node.value.func, ast.Name):
       return node
     
     if node.value.func.id != self.from_type:
