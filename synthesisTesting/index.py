@@ -22,7 +22,7 @@ def testDriver(programPath:str, unitPath: str):
     performanceTests = [] #revist later better way to scale?
     
 
-    for i in range(3):
+    for i in range(11):
         transformer =  testTransformer(programFileName, i*10 )
         unitTree = getAST(unitPath)
         # run transformer to modify tree and collect nodes of interest to be
@@ -40,30 +40,32 @@ def testDriver(programPath:str, unitPath: str):
             combineAndExecute(modAst, performanceTests[0])
             for test in performanceTests:
                 combineAndExecute(modAst, test)
-                #combine ast and tests
-                #execute
                 #record time
                 #output
-
+        # reset list after tests
+        astsToTest = []
         for type in DataType:
             treeProgram = getAST(programPath)
             modAsts = ListTo(treeProgram, type).modify_ast()
             astsToTest = astsToTest + modAsts
 
         index = index + 1
+        # program completes at a depth of 50 or all branches explored
         if astsToTest == [] or index == 50:
             break
-        astsToTest = []
+        
 
 #TODO handle import issue
     # Potentially append filePath all imports
     # temp copy into working dir
 
 def combineAndExecute(modAst, test):
+    # combine imports and body of modified program and test
     for n in test.importNodes:
         modAst.body.insert(0,n)
     modAst.body.append(test.testBody)
 
+    # add assign and call statement to call specific function when executing ast
     assign = ast.Assign(targets=[ast.Name(id=test.testClassName, ctx=ast.Store())], 
             value =ast.Call(func=ast.Name(id=test.testClassName,ctx=ast.Load()),args=[], keywords=[]))
     call_test = ast.Expr(value=ast.Call(func=ast.Attribute(value=ast.Name(
@@ -80,4 +82,4 @@ def combineAndExecute(modAst, test):
 
 
 if __name__ == '__main__':
-    testDriver('..\LearningTests\someFunction.py', '..\LearningTests\someFunctionTests.py')
+    testDriver('..\LearningTests\otherExamplesAST\example.py', '..\LearningTests\someFunctionTests.py')
