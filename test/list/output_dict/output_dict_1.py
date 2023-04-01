@@ -20,6 +20,7 @@ class Example:
         self.list.remove(item)
 
     def for_loop(self):
+        [item for item in self.list]
         count_items = 0
         for item in self.list:
             count_items += 1
@@ -29,5 +30,6 @@ class Example:
         program_synthesis_append(d, 1)
         program_synthesis_count(d, 1)
         program_synthesis_remove(d, 1)
+        [item for item in program_synthesis_for_loop(d)]
         for item in program_synthesis_for_loop(d):
             pass

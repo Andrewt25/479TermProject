@@ -25,8 +25,16 @@ class ForVisitor(ast.NodeTransformer):
 
   def visit_For(self, node: ast.For):
     if get_node_hash(node.iter) != self.valid_var:
-      return node
+      return self.generic_visit(node)
     
     var = get_attr_variable(node.iter)
     node.iter = ast.parse(f'program_synthesis_for_loop({var})').body[0].value
-    return node
+    return self.generic_visit(node)
+
+  def visit_comprehension(self, node: ast.comprehension):
+    if get_node_hash(node.iter) != self.valid_var:
+      return self.generic_visit(node)
+    
+    var = get_attr_variable(node.iter)
+    node.iter = ast.parse(f'program_synthesis_for_loop({var})').body[0].value
+    return self.generic_visit(node)
