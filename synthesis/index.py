@@ -2,24 +2,21 @@ import sys
 import os
 import ast
 import timeit
+import matplotlib.pyplot as plt
 
 file_path = os.path.abspath(__file__)
 sys.path.append(os.path.dirname(os.path.dirname((file_path))))
 
-from synthesis.datatypes import *
-from synthesis.list.list import *
+from datatypes import *
+from list.list import *
 from testTransformer import *
-from utils import *
 
 
 def testDriver(programPath:str, unitPath: str):
-    # declerations
-    # topPerformer = (ast, time);
-
     programFileName = getFileName(programPath)
 
     # Build tests base -> 100 increment 10 at a time 11 total
-    performanceTests = [] #revist later better way to scale?
+    performanceTests = [] 
     
 
     for i in range(11):
@@ -33,6 +30,7 @@ def testDriver(programPath:str, unitPath: str):
     
     astsToTest = [getAST(programPath)]
     topPerformer =()
+    initial =()
     index = 1
 
     while True:
@@ -46,8 +44,10 @@ def testDriver(programPath:str, unitPath: str):
                 #record time
                 #output
             if len(times) > 0:
-                rate = avgGrowthRate(times)
-                topIterPerformer = comparePerformance(topIterPerformer, rate, modAst)
+                if(len(initial) == 0):
+                    rate = avgGrowthRate(times)
+                    initial = (modAst, times, rate)
+                topIterPerformer = comparePerformance(topIterPerformer, times, modAst)
 
         topPerformer = comparePerformance(topPerformer, topIterPerformer[1], topIterPerformer[0])
 
@@ -55,7 +55,7 @@ def testDriver(programPath:str, unitPath: str):
         print(len(astsToTest))
         astsToTest = []
         for type in DataType:
-            if(len(topIterPerformer) == 2):
+            if(len(topIterPerformer) == 3):
                 treeProgram = topIterPerformer[0]
                 modAsts = ListTo(copy.deepcopy(treeProgram)).modify_ast(type)
                 astsToTest = astsToTest + modAsts
@@ -68,7 +68,9 @@ def testDriver(programPath:str, unitPath: str):
         # program completes at a depth of 50 or all branches explored
         if astsToTest == [] or index == 50:
             break
-    print(topPerformer[1])
+    print(initial[1], topPerformer[1])
+    createOutput(initial[1], topPerformer[1])
+    writeSuggestion(topPerformer[0])
         
 
 def combineAndExecute(modAst, test):
@@ -86,18 +88,62 @@ def combineAndExecute(modAst, test):
     modAst.body.append(assign)
     modAst.body.append(call_test)
     modAst = ast.fix_missing_locations(modAst)
-    with open("astExecute.txt", "w") as f:
-        f.write(ast.unparse(modAst))
-        f.close()
 
     code = compile(modAst, filename='<ast>', mode='exec')
     env = {}
     t = timeit.Timer(lambda:exec(code, env))
     try:  
         return [t.timeit(10)/10]
-    except:
+    except Exception as e:
+        print(e)
         return []
+    
+def getAST(path:str) -> ast.Module:
+    with open(path) as f:
+        tree = ast.parse(f.read(), filename=path)
+        f.close()
+    return tree
 
+def getFileName(path:str):
+    return path.split('\\').pop().rstrip('.py')
+
+def comparePerformance(current, times, ast):
+    rate = avgGrowthRate(times)
+    if(len(current) == 3):
+        if( rate < current[2]):
+            return (ast, times, rate)
+        else:
+            return current
+    else:
+        return (ast, times, rate)
+
+def avgGrowthRate(times):
+    growthRates = []
+    for i in range(len(times)-1):
+        initial = times[i]
+        final = times[i+1]
+        rate = (final - initial)/initial
+        growthRates.append(rate)
+
+    return sum(growthRates)/len(growthRates)
+
+def writeSuggestion(modAst):
+    if(not os.path.exists("perf_test_suggested")):
+        os.mkdir("perf_test_suggested")
+    with open("perf_test_suggested/suggested.py", "w") as f:
+        f.write(ast.unparse(modAst))
+        f.close()
+
+
+def createOutput(initial, best):
+    x = range(11)
+    plt.plot(x, initial, label='Initial')
+    plt.plot(x, best, label='Top Performer')
+    plt.xlabel('Test iteration')
+    plt.ylabel('Avg Time')
+    plt.title('Initial vs. Top Performer')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -106,4 +152,3 @@ if __name__ == '__main__':
         print("Unexpected number of arguments expected 2 got", len(args))
     else:
         testDriver(args[0],args[1])
-        #testDriver('..\LearningTests\otherExamplesAST\example.py', '..\LearningTests\someFunctionTests.py')

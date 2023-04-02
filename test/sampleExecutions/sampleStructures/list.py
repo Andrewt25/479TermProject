@@ -1,8 +1,7 @@
-class Example:
+class ListStruct:
   def __init__(self):
     # self.collection = set()
     self.collection = list()
-    self.b = list()
 
   def add(self, item):
     # self.collection.add(item)
