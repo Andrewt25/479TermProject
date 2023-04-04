@@ -19,7 +19,7 @@ def testDriver(programPath:str, unitPath: str):
     performanceTests = [] 
     
 
-    for i in range(11):
+    for i in range(101):
         transformer =  testTransformer(programFileName, i*10 )
         unitTree = getAST(unitPath)
         # run transformer to modify tree and collect nodes of interest to be
@@ -52,7 +52,6 @@ def testDriver(programPath:str, unitPath: str):
         topPerformer = comparePerformance(topPerformer, topIterPerformer[1], topIterPerformer[0])
 
         # reset list after tests
-        print(len(astsToTest))
         astsToTest = []
         for type in DataType:
             if(len(topIterPerformer) == 3):
@@ -68,7 +67,6 @@ def testDriver(programPath:str, unitPath: str):
         # program completes at a depth of 50 or all branches explored
         if astsToTest == [] or index == 50:
             break
-    print(initial[1], topPerformer[1])
     createOutput(initial[1], topPerformer[1])
     writeSuggestion(topPerformer[0])
         
@@ -136,7 +134,7 @@ def writeSuggestion(modAst):
 
 
 def createOutput(initial, best):
-    x = range(11)
+    x = range(len(initial))
     plt.plot(x, initial, label='Initial')
     plt.plot(x, best, label='Top Performer')
     plt.xlabel('Test iteration')
