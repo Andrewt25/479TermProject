@@ -1,28 +1,27 @@
-class DictStruct:
+from synthesis.list.methods.for_loop import *
+from synthesis.list.methods.remove import *
+from synthesis.list.methods.count import *
+from synthesis.list.methods.append import *
+
+class ListStruct:
 
     def __init__(self):
         self.collection = dict()
 
-    def add(self, key, item):
-        self.collection[key] = item
+    def add(self, item):
+        psynth_list_to_dict_append(self.collection, item)
 
     def exist(self, item):
         return item in self.collection
-
-    def getItem(self, key):
-        return self.collection.get(key)
-
-    def getKeys(self):
-        return self.collection.keys()
 
     def find1(self, item):
         if self.exist(item):
             return item
         return None
 
-    def pop(self, key):
-        if self.exist(key):
-            return self.collection.pop(key)
+    def delete(self, item):
+        if self.exist(item):
+            psynth_list_to_dict_count(self.collection, item)
 
-    def remove(self, key):
-        del self.collection[key]
+    def find2(self, item):
+        return item if self.exist(item) else None
