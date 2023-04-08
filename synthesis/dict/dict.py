@@ -29,6 +29,11 @@ class DictTo():
 
     trees = list()
     for var in variables:
+      check_visitor = CheckVariableIsModifiedVisitor(var)
+      check_visitor.visit(self.ast_obj)
+      if check_visitor.modified:
+        continue
+
       tree = copy.deepcopy(self.ast_obj)
 
       # Modify all variables that is a type dict to target data type

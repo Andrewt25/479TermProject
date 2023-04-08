@@ -18,7 +18,14 @@ class TestDictTo(unittest.TestCase):
 
     for output_tree in self.dict_to.modify_ast(DataType.List):
       self.assertTrue(ast.dump(output_tree) in expected_output_tree)
+  
+  def test_already_modified(self):
+    filename = 'test/dict/input_modified_dict.py'
+    with open(filename) as f:
+      input_tree = ast.parse(f.read(), filename=filename)
+    dict_to = DictTo(input_tree)
 
+    self.assertTrue(len(dict_to.modify_ast(DataType.List)) == 0)
 
 if __name__ == '__main__':
   unittest.main()

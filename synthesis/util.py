@@ -57,6 +57,21 @@ def add_import(node: ast.Module, import_str: str):
       break
 
 
+class CheckVariableIsModifiedVisitor(ast.NodeVisitor):
+  def __init__(self, variable):
+    self.variable = variable
+    self.modified = False
+  
+  def visit_Call(self, node: ast.Call):
+    if not isinstance(node.func, ast.Name):
+      return
+    
+    if len(node.args) > 0:
+      var = get_node_hash(node.args[0])
+      if var == self.variable and 'psynth' in node.func.id:
+        self.modified = True
+
+
 class FindVariableDeclarations(ast.NodeVisitor):
 
   def __init__(self, data_type: DataType):
