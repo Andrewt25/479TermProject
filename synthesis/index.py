@@ -4,7 +4,6 @@ import ast
 import heapq
 import timeit
 import matplotlib.pyplot as plt
-import hashlib
 
 file_path = os.path.abspath(__file__)
 sys.path.append(os.path.dirname(os.path.dirname((file_path))))
@@ -21,6 +20,7 @@ class TestDriver():
         self.astId = 0
         self.open_list = list() # working list
         self.close_list = set() # duplicate detection
+        self.top_results = list()
 
     def run(self):
         programFileName = getFileName(self.programPath)
@@ -41,7 +41,6 @@ class TestDriver():
         rootAst = getAST(self.programPath)
         rootTimes = list()
         heapq.heappush(self.open_list, (0, [], self.astId, rootAst))
-        topIterPerformer = []
         testId = 0
         '''
         First iteration program runs the generated test against the unmodfied program ast and records results. It then finds the possible changes that can be made
@@ -55,9 +54,8 @@ class TestDriver():
             modAstHash = hash(ast.dump(modAst))
             if modAstHash in self.close_list:
                 continue
-            else:
-                self.close_list.add(modAstHash)
 
+            self.close_list.add(modAstHash)
             times = getAstTestRuntimeResults(modAst, performanceTests)
             if len(times) == 0:
                 continue
@@ -66,7 +64,7 @@ class TestDriver():
                 rootTimes = times
 
             rate = avgGrowthRate(times)
-            heapq.heappush(topIterPerformer, (rate, times, testId, modAst))
+            heapq.heappush(self.top_results, (rate, times, testId, modAst))
             testId += 1
 
             for type in DataType:
@@ -76,23 +74,23 @@ class TestDriver():
                 modDictAsts = DictTo(modAst).modify_ast(type)
                 self.addAstsToOpenList(rate, modDictAsts)
 
-        _, topTimes, _,topAst = heapq.heappop(topIterPerformer)
+        _, topTimes, _, topAst = heapq.heappop(self.top_results)
         createOutput(rootTimes, topTimes)
         writeSuggestion(topAst)
 
 
     def addAstsToOpenList(self, rate: float, modifiedAsts: list) -> None:
         for modifiedAst in modifiedAsts:
-            modifiedAstHash = hash(ast.dump(modifiedAst))
-            if modifiedAstHash not in self.close_list:
-                self.astId += 1
-                heapq.heappush(self.open_list, (rate, [], self.astId, modifiedAst))
+            self.astId += 1
+            heapq.heappush(self.open_list, (rate, [], self.astId, modifiedAst))
 
 
 def getAstTestRuntimeResults(modAst: ast.AST, performanceTests: list) -> list:
     # warmup to avoid slow intial runs
-    combineAndExecute(modAst, performanceTests[0])
-
+    runtime_results = combineAndExecute(modAst, performanceTests[0])
+    if len(runtime_results) == 0: # Error occurred
+        return []
+    
     runtime_results = []
     # execute all generated tests against modified program
     for test in performanceTests:
