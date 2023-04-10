@@ -1,6 +1,7 @@
 import sys  
 import os
 import ast
+import heapq
 import timeit
 import matplotlib.pyplot as plt
 import hashlib
@@ -13,90 +14,95 @@ from list.list import *
 from dict.dict import *
 from testTransformer import *
 
+class TestDriver():
+    def __init__(self, programPath: str, unitPath: str):
+        self.programPath = programPath
+        self.unitPath = unitPath
+        self.astId = 0
+        self.open_list = list() # working list
+        self.close_list = set() # duplicate detection
 
-def testDriver(programPath:str, unitPath: str):
-    programFileName = getFileName(programPath)
+    def run(self):
+        programFileName = getFileName(self.programPath)
 
-    # Build tests base -> 100 increment 10 at a time 11 total
-    performanceTests = []
-    encounteredModifications = set()
-    
-    # Generate n modified versions of suplied unit test incrementing complexity by 10.
-    # i.e. dupicating operation 10 times up to n*10 times
-    for i in range(101):
-        transformer =  testTransformer(programFileName, i*10 )
-        unitTree = getAST(unitPath)
-        # run transformer to modify tree and collect nodes of interest to be
-        # retrieved from transformer
-        ast.fix_missing_locations(transformer.visit(unitTree))
-        performanceTests.append(transformer)
-
-    
-    astsToTest = [getAST(programPath)]
-    topPerformer =()
-    initial =()
-    index = 1
-
-    '''
-    First iteration program runs the generated test against the unmodfied program ast and records results. It then finds the possible changes that can be made
-    to the ast and passes asts with those changes into the next iteration.
-    Second iteration onwards the test are run against all the asts supplied by the previous iteration using the ast with the smallest growth rate and find asts
-    for further exploration
-    '''
-    while True:
-        topIterPerformer = ()
-        for modAst in astsToTest:
-            # warmup to avoid slow intial runs
-            combineAndExecute(copy.deepcopy(modAst), performanceTests[0])
-            times = []
-            # execute all generated tests against modified program
-            for test in performanceTests:
-                times = times + combineAndExecute(copy.deepcopy(modAst), test)
-            # check for times if none returned execution failed
-            if len(times) > 0:
-                # set initial on first execution for unmodified program
-                if(len(initial) == 0):
-                    rate = avgGrowthRate(times)
-                    initial = (modAst, times, rate)
-                # comparison to find best iteration performer
-                topIterPerformer = comparePerformance(topIterPerformer, times, modAst)
-        # comparison to find best overall performer
-        if(len(topIterPerformer) == 3):
-            topPerformer = comparePerformance(topPerformer, topIterPerformer[1], topIterPerformer[0])
-
-        # reset list after tests
-        astsToTest = []
-        # Find modifications if any for each supported type
-        for type in DataType:
-            # checks that there were valid results this iteration
-            if(len(topIterPerformer) == 3):
-                # Get possible changes for supported types
-                treeProgram = topIterPerformer[0]
-                modListAsts = ListTo(copy.deepcopy(treeProgram)).modify_ast(type)
-                astsToTest = astsToTest + modListAsts
-                modDictAsts = DictTo(copy.deepcopy(treeProgram)).modify_ast(type)
-                astsToTest = astsToTest + modDictAsts
+        # Build tests base -> 100 increment 10 at a time 11 total
+        performanceTests = []
         
-        # check for duplicate asts
-        for modAst in astsToTest:
-            ast_str = ast.dump(modAst)
-            hash_obj = hashlib.sha256(ast_str.encode())
-            hash = hash_obj.hexdigest()
-            if(hash in encounteredModifications):
-                astsToTest.remove(modAst)
-            else:
-                encounteredModifications.add(hash)
+        # Generate n modified versions of suplied unit test incrementing complexity by 10.
+        # i.e. dupicating operation 10 times up to n*10 times
+        for i in range(101):
+            transformer =  testTransformer(programFileName, i*10)
+            unitTree = getAST(self.unitPath)
+            # run transformer to modify tree and collect nodes of interest to be
+            # retrieved from transformer
+            ast.fix_missing_locations(transformer.visit(unitTree))
+            performanceTests.append(transformer)
 
-
-        index = index + 1
+        rootAst = getAST(self.programPath)
+        rootTimes = list()
+        heapq.heappush(self.open_list, (0, [], self.astId, rootAst))
+        topIterPerformer = []
+        testId = 0
+        '''
+        First iteration program runs the generated test against the unmodfied program ast and records results. It then finds the possible changes that can be made
+        to the ast and passes asts with those changes into the next iteration.
+        Second iteration onwards the test are run against all the asts supplied by the previous iteration using the ast with the smallest growth rate and find asts
+        for further exploration
+        '''
         # program completes at a depth of 50 or all branches explored
-        if astsToTest == [] or index == 10:
-            break
-    createOutput(initial[1], topPerformer[1])
-    writeSuggestion(topPerformer[0])
-        
+        while len(self.open_list) != 0:
+            _, _, _, modAst = heapq.heappop(self.open_list)
+            modAstHash = hash(ast.dump(modAst))
+            if modAstHash in self.close_list:
+                continue
+            else:
+                self.close_list.add(modAstHash)
+
+            times = getAstTestRuntimeResults(modAst, performanceTests)
+            if len(times) == 0:
+                continue
+
+            if len(rootTimes) == 0:
+                rootTimes = times
+
+            rate = avgGrowthRate(times)
+            heapq.heappush(topIterPerformer, (rate, times, testId, modAst))
+            testId += 1
+
+            for type in DataType:
+                modListAsts = ListTo(modAst).modify_ast(type)
+                self.addAstsToOpenList(rate, modListAsts)
+
+                modDictAsts = DictTo(modAst).modify_ast(type)
+                self.addAstsToOpenList(rate, modDictAsts)
+
+        _, topTimes, _,topAst = heapq.heappop(topIterPerformer)
+        createOutput(rootTimes, topTimes)
+        writeSuggestion(topAst)
+
+
+    def addAstsToOpenList(self, rate: float, modifiedAsts: list) -> None:
+        for modifiedAst in modifiedAsts:
+            modifiedAstHash = hash(ast.dump(modifiedAst))
+            if modifiedAstHash not in self.close_list:
+                self.astId += 1
+                heapq.heappush(self.open_list, (rate, [], self.astId, modifiedAst))
+
+
+def getAstTestRuntimeResults(modAst: ast.AST, performanceTests: list) -> list:
+    # warmup to avoid slow intial runs
+    combineAndExecute(modAst, performanceTests[0])
+
+    runtime_results = []
+    # execute all generated tests against modified program
+    for test in performanceTests:
+        runtime_results += combineAndExecute(modAst, test)
+    return runtime_results
+
+
 # combines two asts into single ast and execute the results
 def combineAndExecute(modAst, test):
+    modAst = copy.deepcopy(modAst)
     # combine imports and body of modified program and test
     for n in test.importNodes:
         modAst.body.insert(0,n)
@@ -174,4 +180,4 @@ if __name__ == '__main__':
     if(len(args) != 2):
         print("Unexpected number of arguments expected 2 got", len(args))
     else:
-        testDriver(args[0],args[1])
+        TestDriver(args[0],args[1]).run()
