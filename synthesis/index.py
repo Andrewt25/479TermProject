@@ -17,7 +17,8 @@ class TestDriver():
     def __init__(self, programPath: str, unitPath: str):
         self.programPath = programPath
         self.unitPath = unitPath
-        self.astId = 0
+        self.ast_id = 0
+        self.result_id = 0
         self.open_list = list() # working list
         self.close_list = set() # duplicate detection
         self.top_results = list()
@@ -40,17 +41,13 @@ class TestDriver():
 
         rootAst = getAST(self.programPath)
         rootTimes = list()
-        heapq.heappush(self.open_list, (0, [], self.astId, rootAst))
-        testId = 0
+        heapq.heappush(self.open_list, (0, self.ast_id, rootAst))
+        
         '''
-        First iteration program runs the generated test against the unmodfied program ast and records results. It then finds the possible changes that can be made
-        to the ast and passes asts with those changes into the next iteration.
-        Second iteration onwards the test are run against all the asts supplied by the previous iteration using the ast with the smallest growth rate and find asts
-        for further exploration
+            A* algorithm, each child AST uses its parent's growth rate as its heristic value.
         '''
-        # program completes at a depth of 50 or all branches explored
         while len(self.open_list) != 0:
-            _, _, _, modAst = heapq.heappop(self.open_list)
+            _, _, modAst = heapq.heappop(self.open_list)
             modAstHash = hash(ast.dump(modAst))
             if modAstHash in self.close_list:
                 continue
@@ -64,8 +61,8 @@ class TestDriver():
                 rootTimes = times
 
             rate = avgGrowthRate(times)
-            heapq.heappush(self.top_results, (rate, times, testId, modAst))
-            testId += 1
+            heapq.heappush(self.top_results, (rate, self.result_id, times, modAst))
+            self.result_id += 1
 
             for type in DataType:
                 modListAsts = ListTo(modAst).modify_ast(type)
@@ -74,15 +71,15 @@ class TestDriver():
                 modDictAsts = DictTo(modAst).modify_ast(type)
                 self.addAstsToOpenList(rate, modDictAsts)
 
-        _, topTimes, _, topAst = heapq.heappop(self.top_results)
+        _, _, topTimes, topAst = heapq.heappop(self.top_results)
         createOutput(rootTimes, topTimes)
         writeSuggestion(topAst)
 
 
     def addAstsToOpenList(self, rate: float, modifiedAsts: list) -> None:
         for modifiedAst in modifiedAsts:
-            self.astId += 1
-            heapq.heappush(self.open_list, (rate, [], self.astId, modifiedAst))
+            self.ast_id += 1
+            heapq.heappush(self.open_list, (rate, self.ast_id, modifiedAst))
 
 
 def getAstTestRuntimeResults(modAst: ast.AST, performanceTests: list) -> list:
@@ -124,25 +121,18 @@ def combineAndExecute(modAst, test):
     except Exception as e:
         print(e)
         return []
-    
+
+
 def getAST(path:str) -> ast.Module:
     with open(path) as f:
         tree = ast.parse(f.read(), filename=path)
         f.close()
     return tree
 
+
 def getFileName(path:str):
     return path.split('\\').pop().rstrip('.py')
 
-def comparePerformance(current, times, ast):
-    rate = avgGrowthRate(times)
-    if(len(current) == 3):
-        if( rate < current[2]):
-            return (ast, times, rate)
-        else:
-            return current
-    else:
-        return (ast, times, rate)
 
 def avgGrowthRate(times):
     growthRates = []
@@ -153,6 +143,7 @@ def avgGrowthRate(times):
         growthRates.append(rate)
 
     return sum(growthRates)/len(growthRates)
+
 
 def writeSuggestion(modAst):
     if(not os.path.exists("perf_test_suggested")):
