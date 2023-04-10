@@ -72,7 +72,7 @@ class TestDriver():
             print('No Results')
             return
 
-        _, _, topTimes, topAst = self.popResultsFromTopResults()
+        topTimes, topAst = self.popResultsFromTopResults()
         createOutput(rootTimes, topTimes)
         writeSuggestion(topAst)
 
@@ -85,10 +85,11 @@ class TestDriver():
             heapq.heappush(self.open_list, (rate, self.ast_id, modifiedAst))
             self.ast_id += 1
 
-    def popResultsFromTopResults(self):
-        return heapq.heappop(self.top_results)
+    def popResultsFromTopResults(self) -> tuple:
+        _, _, topTimes, topAst = heapq.heappop(self.top_results)
+        return topTimes, topAst
 
-    def addAstResultsToTopResults(self, rate: float, times: list, modifiedAst: ast.AST):
+    def addAstResultsToTopResults(self, rate: float, times: list, modifiedAst: ast.AST) -> None:
         heapq.heappush(self.top_results, (rate, self.result_id, times, modifiedAst))
         self.result_id += 1
 
