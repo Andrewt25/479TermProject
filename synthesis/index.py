@@ -41,45 +41,56 @@ class TestDriver():
 
         rootAst = getAST(self.programPath)
         rootTimes = list()
-        heapq.heappush(self.open_list, (0, self.ast_id, rootAst))
+        self.addAstsToOpenList(0, [rootAst])
         
         '''
             A* algorithm, each child AST uses its parent's growth rate as its heristic value.
         '''
         while len(self.open_list) != 0:
-            _, _, modAst = heapq.heappop(self.open_list)
+            modAst = self.popAstFromOpenList()
             modAstHash = hash(ast.dump(modAst))
             if modAstHash in self.close_list:
                 continue
 
             self.close_list.add(modAstHash)
             times = getAstTestRuntimeResults(modAst, performanceTests)
+            rootTimes = times if len(rootTimes) == 0 else rootTimes
             if len(times) == 0:
                 continue
 
-            if len(rootTimes) == 0:
-                rootTimes = times
-
             rate = avgGrowthRate(times)
-            heapq.heappush(self.top_results, (rate, self.result_id, times, modAst))
-            self.result_id += 1
+            self.addAstResultsToTopResults(rate, times, modAst)
 
-            for type in DataType:
-                modListAsts = ListTo(modAst).modify_ast(type)
+            for datatype in DataType:
+                modListAsts = ListTo(modAst).modify_ast(datatype)
                 self.addAstsToOpenList(rate, modListAsts)
 
-                modDictAsts = DictTo(modAst).modify_ast(type)
+                modDictAsts = DictTo(modAst).modify_ast(datatype)
                 self.addAstsToOpenList(rate, modDictAsts)
 
-        _, _, topTimes, topAst = heapq.heappop(self.top_results)
+        if len(self.top_results) == 0:
+            print('No Results')
+            return
+
+        _, _, topTimes, topAst = self.popResultsFromTopResults()
         createOutput(rootTimes, topTimes)
         writeSuggestion(topAst)
 
+    def popAstFromOpenList(self) -> ast.AST:
+        _, _, modAst = heapq.heappop(self.open_list)
+        return modAst
 
     def addAstsToOpenList(self, rate: float, modifiedAsts: list) -> None:
         for modifiedAst in modifiedAsts:
-            self.ast_id += 1
             heapq.heappush(self.open_list, (rate, self.ast_id, modifiedAst))
+            self.ast_id += 1
+
+    def popResultsFromTopResults(self):
+        return heapq.heappop(self.top_results)
+
+    def addAstResultsToTopResults(self, rate: float, times: list, modifiedAst: ast.AST):
+        heapq.heappush(self.top_results, (rate, self.result_id, times, modifiedAst))
+        self.result_id += 1
 
 
 def getAstTestRuntimeResults(modAst: ast.AST, performanceTests: list) -> list:
