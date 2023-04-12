@@ -18,9 +18,10 @@ class PermuteVariables():
       var_visitor = FindVariables(dataType)
       var_visitor.visit(self.ast_obj)
       variables += var_visitor.variables
+
     return variables
 
-  def find_editible_locations(self, source_var):
+  def find_editable_locations(self, source_var):
     result = list()
     for_visitor = ForLoopVisitor(source_var)
     for_visitor.visit(self.ast_obj)
@@ -44,7 +45,7 @@ class PermuteVariables():
     trees = list()
     for source_var, target_var in itertools.permutations(variables, r=2):
       # Find all the source variable usages and change them to the target variable
-      source_locations = self.find_editible_locations(source_var[0])
+      source_locations = self.find_editable_locations(source_var[0])
       for n in range(1, len(source_locations) + 1):
         location_combinations = list(itertools.combinations(source_locations, r=n))
         for locations_to_modify in location_combinations:
