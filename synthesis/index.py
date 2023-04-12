@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname((file_path))))
 from datatypes import *
 from list.list import *
 from dict.dict import *
+from permutation.permute_variables import *
 from testTransformer import *
 
 class TestDriver():
@@ -62,6 +63,9 @@ class TestDriver():
             self.addAstResultsToTopResults(rate, times, modAst)
 
             for datatype in DataType:
+                permutationAstList = PermuteVariables(modAst).modify_ast()
+                self.addAstsToOpenList(rate, permutationAstList)
+
                 modListAsts = ListTo(modAst).modify_ast(datatype)
                 self.addAstsToOpenList(rate, modListAsts)
 
