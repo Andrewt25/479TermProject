@@ -46,12 +46,14 @@ class PermuteVariables():
       # Find all the source variable usages and change them to the target variable
       source_locations = self.find_editible_locations(source_var[0])
       for n in range(1, len(source_locations) + 1):
-        locations_to_modify = list(itertools.combinations(source_locations, r=n))
-        for locations in locations_to_modify:
+        location_combinations = list(itertools.combinations(source_locations, r=n))
+        for locations_to_modify in location_combinations:
+          locations = set([(location[0], location[1]) for location in locations_to_modify])
+          
           tree = copy.deepcopy(self.ast_obj)
-          for location in locations:
-            transformer = Transformer(target_var[1], (location[0], location[1]))
-            tree = transformer.visit(tree)
+          transformer = Transformer(target_var[1], locations)
+          tree = transformer.visit(tree)
+          
           trees.append(tree)
 
     return trees
@@ -77,27 +79,27 @@ class FindVariables(ast.NodeVisitor):
 
 class Transformer(ast.NodeTransformer):
 
-  def __init__(self, variable, location_to_modify):
+  def __init__(self, variable, locations_to_modify):
     self.variable = ast.parse(variable).body[0].value
-    self.location_to_modify = location_to_modify
+    self.locations_to_modify = locations_to_modify
   
   def visit_Compare(self, node: ast.Compare):
-    if (node.lineno, node.col_offset) != self.location_to_modify:
+    if (node.lineno, node.col_offset) not in self.locations_to_modify:
       return self.generic_visit(node)
     node.comparators[0] = self.variable
-    return node
+    return self.generic_visit(node)
   
   def visit_For(self, node: ast.For):
-    if (node.lineno, node.col_offset) != self.location_to_modify:
+    if (node.lineno, node.col_offset) not in  self.locations_to_modify:
       return self.generic_visit(node)
     node.iter = self.variable
-    return node
+    return self.generic_visit(node)
     
   def visit_ListComp(self, node: ast.ListComp):
-    if (node.lineno, node.col_offset) != self.location_to_modify:
+    if (node.lineno, node.col_offset) not in  self.locations_to_modify:
       return self.generic_visit(node)
     node.generators[0].iter = self.variable
-    return node
+    return self.generic_visit(node)
   
 
 
