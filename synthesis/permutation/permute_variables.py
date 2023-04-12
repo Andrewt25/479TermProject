@@ -36,10 +36,6 @@ class PermuteVariables():
 
     return result
 
-  '''
-  Attribute(value=Name(id='self', ctx=Load()), attr='list'
-  Attribute(value=Name(id='self', ctx=Load()), attr='set'
-  '''
   def modify_ast(self) -> list:
     variables = self.find_data_type_varable()
     if len(variables) < 2:
@@ -80,6 +76,7 @@ class FindVariables(ast.NodeVisitor):
 
 
 class Transformer(ast.NodeTransformer):
+
   def __init__(self, variable, location_to_modify):
     self.variable = ast.parse(variable).body[0].value
     self.location_to_modify = location_to_modify

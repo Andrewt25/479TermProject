@@ -24,8 +24,11 @@ class TestPermuteVariables(unittest.TestCase):
     ]
     expected_output_tree = get_expected_output_trees(filenames)
 
-    for output_tree in self.permute_variables.modify_ast():
+    output_asts = self.permute_variables.modify_ast()
+    for output_tree in output_asts:
       self.assertTrue(ast.dump(output_tree) in expected_output_tree)
+
+    self.assertTrue(len(output_asts) == len(expected_output_tree))
 
 if __name__ == '__main__':
   unittest.main()
