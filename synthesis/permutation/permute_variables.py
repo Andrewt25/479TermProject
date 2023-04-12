@@ -49,7 +49,7 @@ class PermuteVariables():
       for n in range(1, len(source_locations) + 1):
         location_combinations = list(itertools.combinations(source_locations, r=n))
         for locations_to_modify in location_combinations:
-          locations = set([(location[0], location[1]) for location in locations_to_modify])
+          locations = set([(loc[0], loc[1], loc[2]) for loc in locations_to_modify])
           
           tree = copy.deepcopy(self.ast_obj)
           transformer = Transformer(target_var[1], locations)
@@ -80,26 +80,28 @@ class FindVariables(ast.NodeVisitor):
 
 class Transformer(ast.NodeTransformer):
 
-  def __init__(self, variable, locations_to_modify):
-    self.variable = ast.parse(variable).body[0].value
+  def __init__(self, to_variable, locations_to_modify):
+    self.to_variable = ast.parse(to_variable).body[0].value
     self.locations_to_modify = locations_to_modify
   
   def visit_Compare(self, node: ast.Compare):
-    if (node.lineno, node.col_offset) not in self.locations_to_modify:
-      return self.generic_visit(node)
-    node.comparators[0] = self.variable
+    for idx, _ in enumerate(node.comparators):
+      if (node.lineno, node.col_offset, idx) in self.locations_to_modify:
+        node.comparators[idx] = self.to_variable
+
     return self.generic_visit(node)
   
   def visit_For(self, node: ast.For):
-    if (node.lineno, node.col_offset) not in  self.locations_to_modify:
-      return self.generic_visit(node)
-    node.iter = self.variable
+    if (node.lineno, node.col_offset, 0) in self.locations_to_modify:
+      node.iter = self.to_variable
+
     return self.generic_visit(node)
-    
+  
   def visit_ListComp(self, node: ast.ListComp):
-    if (node.lineno, node.col_offset) not in  self.locations_to_modify:
-      return self.generic_visit(node)
-    node.generators[0].iter = self.variable
+    for idx, _ in enumerate(node.generators):
+      if (node.lineno, node.col_offset, idx) in self.locations_to_modify:
+        node.generators[idx].iter = self.to_variable
+    
     return self.generic_visit(node)
   
 

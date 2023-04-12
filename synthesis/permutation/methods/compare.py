@@ -20,9 +20,9 @@ class CompareVisitor(ast.NodeVisitor):
     self.locations = list()
 
   def visit_Compare(self, node: ast.Compare):
-    if not isinstance(node.comparators[0], ast.Attribute) \
-      or get_node_hash(node.comparators[0]) != self.variable:
-      return
+    for idx, compartor in enumerate(node.comparators):
+      if not isinstance(compartor, ast.Attribute) \
+        or get_node_hash(compartor) != self.variable:
+        return
 
-    self.locations.append((node.lineno, node.col_offset, node))
-
+      self.locations.append((node.lineno, node.col_offset, idx, node))

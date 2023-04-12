@@ -21,4 +21,4 @@ class ForLoopVisitor(ast.NodeVisitor):
       or get_node_hash(node.iter) != self.variable:
       return
 
-    self.locations.append((node.lineno, node.col_offset, node))
+    self.locations.append((node.lineno, node.col_offset, 0, node))

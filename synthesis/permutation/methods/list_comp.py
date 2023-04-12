@@ -25,9 +25,9 @@ class ListCompVisitor(ast.NodeVisitor):
     if len(node.generators) == 0:
       return
 
-    generators = node.generators
-    if not isinstance(generators[0], ast.comprehension) \
-      or get_node_hash(generators[0].iter) != self.variable:
-      return
+    for idx, generator in enumerate(node.generators):
+      if not isinstance(generator, ast.comprehension) \
+        or get_node_hash(generator.iter) != self.variable:
+        return
 
-    self.locations.append((node.lineno, node.col_offset, node))
+      self.locations.append((node.lineno, node.col_offset, idx, node))
