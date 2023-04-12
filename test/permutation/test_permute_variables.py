@@ -26,9 +26,7 @@ class TestPermuteVariables(unittest.TestCase):
 
     output_asts = self.permute_variables.modify_ast()
     for output_tree in output_asts:
-      if ast.dump(output_tree) not in expected_output_tree:
-        print(ast.unparse(output_tree))
-      # self.assertTrue(ast.dump(output_tree) in expected_output_tree)
+      self.assertTrue(ast.dump(output_tree) in expected_output_tree)
 
     self.assertTrue(len(output_asts) == len(expected_output_tree))
 
