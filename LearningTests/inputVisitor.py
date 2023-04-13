@@ -10,7 +10,7 @@ class inputVisitor(ast.NodeTransformer):
     # visiter for functions looks for specific test to mutate
     def visit_FunctionDef(self, node: ast.FunctionDef):
         nodesToCopy =[]
-        if(node.name == 'perf_test'):
+        if(node.name == 'test_perf'):
             for n in node.body:
                 if(n.__class__ == ast.Assign):
                     n.value = self.__getInput(n.value) 

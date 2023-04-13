@@ -1,19 +1,15 @@
-from synthesis.list.methods.remove import *
-from synthesis.list.methods.count import *
-from synthesis.list.methods.append import *
 from random import random
 
 class messages:
-
     def __init__(self):
         self.set = set()
-        self.list = set()
+        self.list = list()
 
     def addMsg(self, msgs):
         for msg in msgs:
             self.set.add(msg)
-            psynth_list_to_set_append(self.list, msg)
-
+            self.list.append(msg)
+    
     def log(self, newMsgs, renameDups=False):
         for msg in newMsgs:
             if renameDups:
@@ -21,13 +17,14 @@ class messages:
                     self.logOne(self.makeUnique(msg))
                 else:
                     self.logOne(msg)
-            elif msg not in self.set:
-                self.logOne(msg)
-
+            else:
+                if msg not in self.list:
+                    self.logOne(msg)
+                
     def logOne(self, msg):
         self.set.add(msg)
-        psynth_list_to_set_append(self.list, msg)
-
+        self.list.append(msg)
+    
     def makeUnique(self, msg):
         randomVal = random()
-        return msg + '_' + str(hash(randomVal))
+        return msg + "_" + str(hash(randomVal))

@@ -9,23 +9,11 @@ class testTransformer(ast.NodeTransformer):
 
     # visiter for functions looks for specific test to mutate
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        nodesToCopy = []
-        if(node.name == 'perf_test'):
+        if(node.name == 'test_perf'):
             for n in node.body:
                 if(n.__class__ == ast.Assign):
                     n.value = self.__getInput(n.value) 
-                if(n.value.__class__ == ast.Call and n.value.func.__class__ == ast.Attribute):
-                    if(n.value.func.value.id != 'self'):
-                        # record function calls to duplicate
-                        nodesToCopy.append(n)
             self.perf_node = node
-        # duplicate function calls
-        for n in nodesToCopy:
-            for i in range(1,self.count):
-                nodeCopy = copy.deepcopy(n)
-                for j in range(len(nodeCopy.value.args)):
-                    nodeCopy.value.args[j].value = nodeCopy.value.args[j].value + i
-                node.body.insert(node.body.index(n), nodeCopy)
         self.generic_visit(node)
         return node
     
@@ -59,14 +47,11 @@ class testTransformer(ast.NodeTransformer):
     # UTILITY FUNCTIONS
     
     # returns value for constants
-    def __getConstantInput(self, nodeType):
+    def __getConstantInput(self, nodeType, base = 0, offset = 0):
         if nodeType == str:
-            val = ""
-            for i in range(self.count):
-                val = val + "a"
-            return val
+            return str(base) + str(offset)
         elif nodeType == int:
-            return  1000*self.count 
+            return  base + offset
         return 0
 
     # add items equal to size to ast list using first item as type to generate input
@@ -74,9 +59,10 @@ class testTransformer(ast.NodeTransformer):
     def __getListInput(self,nodeList):
         size=self.count
         length = len(nodeList)
-        nodeType = type(nodeList[0].value) if length > 0 else None
+        nodeValue = nodeList[0].value if length > 0 else 0
+        nodeType = type(nodeValue) if length > 0 else None
         for i in range(length, length+size):
-            node = ast.Constant(self.__getConstantInput(nodeType))
+            node = ast.Constant(self.__getConstantInput(nodeType, nodeValue, i))
             nodeList.insert(i,node)
         return nodeList
 
@@ -84,7 +70,7 @@ class testTransformer(ast.NodeTransformer):
     def __getInput(self, node):
         nodeType = type(node)
         if nodeType == ast.Constant:
-            node.value = self.__getConstantInput(type(node.value))
+            node.value = self.__getConstantInput(type(node.value), self.count*1000)
         elif hasattr(node, 'elts'):
             node.elts = self.__getListInput(node.elts)
         return node

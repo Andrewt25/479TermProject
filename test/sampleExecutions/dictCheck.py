@@ -1,4 +1,4 @@
-from test.sampleExecutions.sampleStructures.dict import DictStruct
+from test.sampleExecutions.sampleCode.dict import DictStruct
 
 def listIncrements(a:DictStruct, start):
     for i in range(len(a.collection)):

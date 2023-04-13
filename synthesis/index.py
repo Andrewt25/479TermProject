@@ -123,7 +123,7 @@ def combineAndExecute(modAst, test):
     assign = ast.Assign(targets=[ast.Name(id=test.testClassName, ctx=ast.Store())], 
             value =ast.Call(func=ast.Name(id=test.testClassName,ctx=ast.Load()),args=[], keywords=[]))
     call_test = ast.Expr(value=ast.Call(func=ast.Attribute(value=ast.Name(
-        id=test.testClassName, ctx=ast.Load()), attr='perf_test', ctx=ast.Load()), args=[], keywords=[] ))
+        id=test.testClassName, ctx=ast.Load()), attr='test_perf', ctx=ast.Load()), args=[], keywords=[] ))
     
     modAst.body.append(assign)
     modAst.body.append(call_test)

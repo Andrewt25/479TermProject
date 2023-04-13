@@ -1,4 +1,4 @@
-from test.sampleExecutions.sampleStructures.list import ListStruct
+from test.sampleExecutions.sampleCode.list import ListStruct
 import test.sampleExecutions.listCheck
 import unittest
 from synthesis.dict.methods.values import *
