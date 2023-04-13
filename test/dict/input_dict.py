@@ -43,3 +43,6 @@ class Example():
     [value for value in self.dict.values()]
     for value in self.dict.values():
       temp_v = value # duplicates allowed
+
+  def key_exists(self, key):
+    return key in self.dict

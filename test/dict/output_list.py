@@ -1,3 +1,4 @@
+from synthesis.dict.methods.exists import *
 from synthesis.dict.methods.values import *
 from synthesis.dict.methods.keys import *
 from synthesis.dict.methods.get import *
@@ -49,3 +50,6 @@ class Example:
         [value for value in psynth_dict_to_list_values(self.dict)]
         for value in psynth_dict_to_list_values(self.dict):
             temp_v = value
+
+    def key_exists(self, key):
+        return psynth_dict_to_list_exists(self.dict, key)

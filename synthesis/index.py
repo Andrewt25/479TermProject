@@ -77,6 +77,10 @@ class TestDriver():
             return
 
         topTimes, topAst = self.popResultsFromTopResults()
+        if rootTimes == topTimes:
+            print('No Improvements')
+            return
+
         createOutput(rootTimes, topTimes)
         writeSuggestion(topAst)
 
