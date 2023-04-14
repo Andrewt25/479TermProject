@@ -180,11 +180,12 @@ def writeSuggestion(modAst):
 
 
 def createOutput(initial, best):
-    x = range(len(initial))
+    x = [2**n for n in range(len(initial))]
     plt.plot(x, initial, label='Initial')
     plt.plot(x, best, label='Top Performer')
-    plt.xlabel('Test iteration')
+    plt.xlabel('size n')
     plt.ylabel('Avg Time')
+    plt.xscale('log', base=2)
     plt.title('Initial vs. Top Performer')
     plt.legend()
     plt.show()
