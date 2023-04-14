@@ -46,6 +46,16 @@ def get_args(args: ast.arguments):
   return items
 
 
+def get_value(node):
+  match type(node):
+    case ast.Constant:
+      return node.value
+    case ast.Name:
+      return node.id
+    case _:
+      raise Exception(f'{ast.dump(node)} type not found.')
+
+
 def add_import(node: ast.Module, import_str: str):
   import_node = ast.parse(import_str).body[0]
   for body in node.body:

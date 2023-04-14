@@ -4,13 +4,9 @@ from synthesis.datatypes import *
 
 
 def psynth_dict_to_list_add_or_update(my_list: list, key, value):
-  if len(my_list) == 1:
-    k, _= my_list[0]
-    if k == key:
-      my_list[0] = (key, value)
-      return
-  elif len(my_list) > 1:
-    for idx, k, _ in enumerate(my_list):
+  if len(my_list) != 0:
+    for idx, item in enumerate(my_list):
+      k, _ = item
       if k == key:
         my_list[idx] = (key, value)
         return

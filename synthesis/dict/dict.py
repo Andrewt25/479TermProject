@@ -9,6 +9,7 @@ from .methods.get import *
 from .methods.items import *
 from .methods.keys import *
 from .methods.values import *
+from .methods.exists import *
 
 class DictTo():
 
@@ -60,6 +61,9 @@ class DictTo():
 
       values_visitor = ValuesVisitor(var, target_type)
       tree = values_visitor.visit(tree)
+
+      exists_visitor = ExistsVisitor(var, target_type)
+      tree = exists_visitor.visit(tree)
 
       trees.append(tree)
 
