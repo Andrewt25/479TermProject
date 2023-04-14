@@ -70,7 +70,7 @@ class testTransformer(ast.NodeTransformer):
     def __getInput(self, node):
         nodeType = type(node)
         if nodeType == ast.Constant:
-            node.value = self.__getConstantInput(type(node.value), self.count*1000)
+            node.value = self.__getConstantInput(type(node.value), self.count)
         elif hasattr(node, 'elts'):
             node.elts = self.__getListInput(node.elts)
         return node

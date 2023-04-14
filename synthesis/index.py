@@ -4,6 +4,7 @@ import ast
 import heapq
 import timeit
 import matplotlib.pyplot as plt
+import statistics
 
 file_path = os.path.abspath(__file__)
 sys.path.append(os.path.dirname(os.path.dirname((file_path))))
@@ -15,9 +16,10 @@ from permutation.permute_variables import *
 from testTransformer import *
 
 class TestDriver():
-    def __init__(self, programPath: str, unitPath: str):
+    def __init__(self, programPath: str, unitPath: str, iterations: int ):
         self.programPath = programPath
         self.unitPath = unitPath
+        self.iterations = iterations
         self.ast_id = 0
         self.result_id = 0
         self.open_list = list() # working list
@@ -32,8 +34,8 @@ class TestDriver():
         
         # Generate n modified versions of suplied unit test incrementing complexity by 10.
         # i.e. dupicating operation 10 times up to n*10 times
-        for i in range(101):
-            transformer =  testTransformer(programFileName, i*10)
+        for i in range(self.iterations +1):
+            transformer =  testTransformer(programFileName, 2**i)
             unitTree = getAST(self.unitPath)
             # run transformer to modify tree and collect nodes of interest to be
             # retrieved from transformer
@@ -56,7 +58,7 @@ class TestDriver():
             self.close_list.add(modAstHash)
             times = getAstTestRuntimeResults(modAst, performanceTests)
             rootTimes = times if len(rootTimes) == 0 else rootTimes
-            if len(times) == 0:
+            if len(times) < 2:
                 continue
 
             rate = avgGrowthRate(times)
@@ -132,8 +134,12 @@ def combineAndExecute(modAst, test):
     code = compile(modAst, filename='<ast>', mode='exec')
     env = {}
     t = timeit.Timer(lambda:exec(code, env))
+
     try:  
-        return [t.timeit(10)/10]
+        times = []
+        for i in range(10):
+            times.append(t.timeit(1))
+        return  [statistics.median(times)]
     except Exception as e:
         print(e)
         return []
@@ -182,7 +188,10 @@ def createOutput(initial, best):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    if(len(args) != 2):
-        print("Unexpected number of arguments expected 2 got", len(args))
+    if(len(args) > 3):
+        print("Unexpected number of arguments expected maximum of 3 got", len(args))
+    elif(len(args) < 2):
+         print("Unexpected number of arguments expected minimum of 2 got", len(args))
     else:
-        TestDriver(args[0],args[1]).run()
+        optionalArg = int(args[2]) if len(args) == 3 else 10
+        TestDriver(args[0],args[1], optionalArg).run()
